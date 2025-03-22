@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>New Patient Registration | Hospital Management System</title>
+    <link rel="stylesheet" href="/styles.css">
+</head>
+<body>
+    <div class="container">
+        <h1 class="header">HMS</h1>
+        <div class="content">
+            <h2>New Patient Registration</h2>
+            <form action="/register-patient" method="POST">
+                <label for="username">Username:</label>
+                <input type="text" id="username" name="username" required>
+                
+                <label for="password">Password:</label>
+                <input type="password" id="password" name="password" required>
+                
+                <label for="contact">Contact:</label>
+                <input type="text" id="contact" name="contact" required>
+                
+                <label for="dob">Date of Birth:</label>
+                <input type="date" id="dob" name="dob" required>
+                
+                <button type="submit">Register</button>
+            </form>
+            <button onclick="window.location.href='/receptionist'">Back to Dashboard</button>
+        </div>
+    </div>
+</body>
+</html>
