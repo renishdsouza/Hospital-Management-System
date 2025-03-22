@@ -1,19 +1,116 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <body style="background-color:#FFFAFA;"
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>HomePage</title>
+    <title>Find Patient</title>
+    <style>
+        body {
+            background-color: #f0f2f5;
+            font-family: Arial, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+        }
+        .container {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
+            width: 400px;
+            text-align: center;
+        }
+        h1 {
+            font-size: 22px;
+            margin-bottom: 20px;
+            color: #007BFF;
+        }
+        input {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #ccc;
+            border-radius: 8px;
+            font-size: 16px;
+            outline: none;
+            transition: 0.3s;
+        }
+        input:focus {
+            border-color: #007BFF;
+        }
+        button {
+            background-color: #007BFF;
+            color: white;
+            border: none;
+            padding: 12px;
+            width: 100%;
+            border-radius: 8px;
+            font-size: 16px;
+            cursor: pointer;
+            margin-top: 15px;
+            transition: 0.3s;
+        }
+        button:hover {
+            background-color: #0056b3;
+        }
+        #patient_info {
+            margin-top: 20px;
+            text-align: left;
+            font-size: 16px;
+        }
+        .register-link {
+            display: block;
+            margin-top: 20px;
+            color: #28a745;
+            text-decoration: none;
+            font-size: 16px;
+            font-weight: bold;
+        }
+        .register-link:hover {
+            color: #218838;
+        }
+    </style>
 </head>
 <body>
-    <h1 style="text-align: center;">Hospital Management System</h1>
-    <br>
-    <h2 style="position: absolute;top: 20%;left: 30%;color:#696969; ">Please enter the patient details</h2>
-    <br>
-    <input type="text" id="patient_name" placeholder="Patient Name" style="position: absolute;top: 30%;left: 35%;width: 30%;height: 5%;border-radius: 10px;">
-    <br>
-    <p style="position:absolute;top:36%;left:35%;">add new :</p>
-    <a href="register.html" style="position:absolute;top:37.5%;left:44%;">Register</a>
+    <div class="container">
+        <h1>Find Patient</h1>
+        <input type="number" id="patient_id" placeholder="Enter Patient ID">
+        <button onclick="fetchPatient()">Search</button>
+
+        <div id="patient_info"></div>
+
+        <a href="register.html" class="register-link">Register New Patient</a>
+    </div>
+
+    <script>
+        async function fetchPatient() {
+            const patientId = document.getElementById("patient_id").value;
+            if (!patientId) {
+                alert("Please enter a valid Patient ID.");
+                return;
+            }
+
+            try {
+                const response = await fetch(`http://localhost:5000/patient/${patientId}`);
+                if (response.status === 404) {
+                    document.getElementById("patient_info").innerHTML = "<p style='color:red;'>Patient not found.</p>";
+                } else {
+                    const patient = await response.json();
+                    document.getElementById("patient_info").innerHTML = `
+                        <strong>Name:</strong> ${patient.name} <br>
+                        <strong>Age:</strong> ${patient.age} <br>
+                        <strong>Phone:</strong> ${patient.phone} <br>
+                        <strong>Address:</strong> ${patient.address} <br>
+                        <strong>Gender:</strong> ${patient.gender} <br>
+                        <strong>Email:</strong> ${patient.email || "N/A"}
+                    `;
+                }
+            } catch (error) {
+                console.error("Error fetching patient data:", error);
+                document.getElementById("patient_info").innerHTML = "<p style='color:red;'>Error fetching data. Check server.</p>";
+            }
+        }
+    </script>
 </body>
 </html>
