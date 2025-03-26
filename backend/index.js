@@ -70,15 +70,44 @@ app.post("/login/submit", async (req, res) => {
                             res.status(500).send("Server error");
                                 }
                     if(doctorresult.rows.length>0)
-                        res.render("doctor.ejs",doctorresult.rows);
+                        res.render("doctor_dashboard.ejs",doctorresult.rows);
+                    else
+                        console.log("user entry exists but doctor table entry missing");;
 
                 }   else{
 
                 if(req.body["role"]=="admin"){
-                res.render("admin.ejs",{name:username});
+                    let adminresult;
+                    try{
+                        adminresult = await pool.query(
+                            "SELECT * FROM Admin WHERE user_id=$1",
+                            [result.rows[0].user_id]
+                                                        );
+                        }
+                    catch(err){
+                        console.log(err);
+                        res.status(500).send("Server error");
+                              }
+                    if(adminresult.rows.length>0)          
+                        res.render("admin_dashboard.ejs",adminresult.rows);
+                    else
+                        console.log("user entry exists but admin table entry missing");
                 } else{
-
-                    res.render("reception.ejs");
+                    let receptionnistresult;
+                    try{
+                        receptionnistresult = await pool.query(
+                            "SELECT * FROM Receptionist WHERE user_id=$1",
+                            [result.rows[0].user_id]
+                                                        );
+                        }
+                    catch(err){
+                        console.log(err);
+                        res.status(500).send("Server error");
+                              }
+                    if(receptionnistresult.rows.length>0)
+                        res.render("reception_dashboard.ejs",receptionnistresult.rows);
+                    else
+                        console.log("user entry exists but reception table entry missing");
                 }
             }
         } else {
@@ -91,6 +120,6 @@ app.post("/login/submit", async (req, res) => {
 });
     
 
-    app.listen(port, () => {
-        console.log(`Server running on port ${port}`);
-    });
+app.listen(port, () => {
+    console.log(`Server running on port ${port}`);
+                        });
