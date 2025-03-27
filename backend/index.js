@@ -92,18 +92,18 @@ app.post("/login/submit", async (req, res) => {
                 else
                     console.log("user entry exists but admin table entry missing");
             } else {
-                let receptionistresult;
+                let receptionnistresult;
                 try {
-                    receptionistresult = await pool.query(
-                        'SELECT * FROM "receptionist" WHERE user_id=$1',
+                    receptionnistresult = await pool.query(
+                        'SELECT * FROM "receptionnist" WHERE user_id=$1',
                         [result.rows[0].user_id]
                     );
                 } catch (err) {
                     console.log(err);
                     res.status(500).send("Server error");
                 }
-                if (receptionistresult.rows.length > 0)
-                    res.render("reception_dashboard.ejs", { receptionnistdata: receptionistresult.rows[0] });
+                if (receptionnistresult.rows.length > 0)
+                    res.render("reception_dashboard.ejs", { receptionnistdata: receptionnistresult.rows[0] });
                 else
                     console.log("user entry exists but reception table entry missing");
             }
@@ -153,15 +153,23 @@ app.post("/new/patient/register/submit", async (req, res) => {
         client.release();
     }
 });
-
-//appoinment schedule receptionist stage1
+//first appionments stage 1 page
+app.post("/appoinment/reception/schedule",(req,res)=>{
+    const {receptiondata}=req.body;
+    res.render("first_appoinment_stage_1.ejs",{receptiondata:reception});
+})
+//appoinment schedule receptionnist stage1
 app.post("/new/appoinment/schedule/reception/stage1",async(req,res)=>{
-    const{receptionnistdata,dob,gender,phone}=req.body;
+    const{receptionnistdata,dob,username}=req.body;
     
     try{
         let patientquerresult;
-        patientquerresult=await pool.query("SELECT * FROM patient WHERE phone=$1 AND gender=$2 AND dob=$3",
-            [phone,gender,dob]);
+        let userid,resultuser;
+        //get the userid with the given username
+        resultuser=await pool.query('SELECT * FROM "user" WHERE username=$1',[username]);
+        userid=resultuser.rows[0].user_id;
+        patientquerresult=await pool.query("SELECT * FROM patient WHERE user_id=$1  AND dob=$2",
+            [userid,dob]);
             if(patientquerresult.rows.length>0){
                 res.render("appoinment_scheduler_page_stage2.ejs",{receptiondata:receptionnistdata,
                     patientdetails:patientquerresult.rows[0]});
@@ -176,14 +184,13 @@ app.post("/new/appoinment/schedule/reception/stage1",async(req,res)=>{
 });
 
 // appoinment schedule,stage 2 to stage 3 send logic now below is  stage 2 we have to confirm the patient details
-app.post("/new/appoinment/schedule/reception/stage2", async (req, res)=>{
+app.post("/new/appoinment/schedule/reception/stage2/confirm", async (req, res)=>{
     const {patientdetails,receptionnistdata}=req.body;
     res.render("appoinment_scheduler_page_stage3.ejs",{patientdata:patientdetails,receptionnistdata:receptionnistdata});
 });
 
 //appoinment schedule stage 3
-app.post("/new/appoinment/schedule/reception/stage3", async (req, res)=>{
-    const{patiendata,receptionnistdata}=req.body;
+app.post("/new/appoinment/schedule/reception/stage3/specialization", async (req, res)=>{
     //now here upon choosing a specialist all the doctor names must be given under select option 
     //ask rithvik how this will be implemtned in frontend
     //now before deciding anything in the temp database only timing is available maybe under assumtion that
@@ -195,12 +202,16 @@ app.post("/new/appoinment/schedule/reception/stage3", async (req, res)=>{
     //if available we will allow for the appoinment to be scheduled otherise we have to give some 
     //error message in frontend and also we might have to maintain a limit of appoinments for each day
     //my choice is to go with the first approach with doctor available on all days
+//so here after choosing the specialization we will renser the doctor names available
+const{patiendata,receptionnistdata,specialization}=req.body;
+
+
 });
 
 //go back to dashboard reception
 app.post("/reception/dashboard", async (req, res) => {
-    const{receptionistdata}=req.body;
-    res.render("reception_dashboard.ejs",{receptionnistdata:receptionistdata});
+    const{receptionnistdata}=req.body;
+    res.render("reception_dashboard.ejs",{receptionnistdata:receptionnistdata});
 });
 
 //in patients page  view appoinments
