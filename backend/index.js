@@ -28,7 +28,7 @@ pool.connect()
     .catch(err => console.error("Database connection error", err));
 
 //homepage
-app.get('/', (req, res) => {
+app.get('/', async (req, res) => {
     res.render("login.ejs");
 });
 
@@ -175,7 +175,7 @@ app.post("/new/appoinment/schedule/reception/stage1",async(req,res)=>{
                                 
 });
 
-// appoinment schedule,stage 2 to stage 3 send logic stage 2 we have to confirm the patient details
+// appoinment schedule,stage 2 to stage 3 send logic now below is  stage 2 we have to confirm the patient details
 app.post("/new/appoinment/schedule/reception/stage2", async (req, res)=>{
     const {patientdetails,receptionnistdata}=req.body;
     res.render("appoinment_scheduler_page_stage3.ejs",{patientdata:patientdetails,receptiondata:receptionnistdata});
@@ -183,7 +183,7 @@ app.post("/new/appoinment/schedule/reception/stage2", async (req, res)=>{
 
 //appoinment schedule stage 3
 app.post("/new/appoinment/schedule/reception/stage3", async (req, res)=>{
-    const{patiendatarecevied,receptiondata}=req.body;
+    const{patiendata,receptiondata}=req.body;
     //now here upon choosing a specialist all the doctor names must be given under select option 
     //ask rithvik how this will be implemtned in frontend
     //now before deciding anything in the temp database only timing is available maybe under assumtion that
@@ -199,7 +199,7 @@ app.post("/new/appoinment/schedule/reception/stage3", async (req, res)=>{
 //apoinment token number  page with date and token number and doctor name
 
 //go back to dashboard reception
-app.post("/reception/dashboard", (req, res) => {
+app.post("/reception/dashboard", async (req, res) => {
     const{receptionistdata}=req.body;
     res.render("reception_dashboard.ejs",{receptionnistdata:receptionistdata});
 });
@@ -242,7 +242,7 @@ app.post("/patients/dashboard",async (req,res)=>{
 });
 
 //logout
-app.get("/logout", (req, res) => {
+app.get("/logout",async (req, res) => {
     res.redirect("/");
 });
 
