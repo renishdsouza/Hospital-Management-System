@@ -118,7 +118,8 @@ app.post("/login/submit", async (req, res) => {
 
 //reception new patient register button action
 app.post("/reception/newpatienregister", async (req, res) => {
-    res.render("new_patient_register.ejs", { receptionnistdatasent: req.body });
+    let {receptionistdata}=req.body;
+    res.render("new_patient_register.ejs", { receptionnistdatasent:receptionistdata  });
 });
 
 //new patient registeration page action
