@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login | Hospital Management System</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+        }
+        .container {
+            background-color: #fff;
+            padding: 20px;
+            border-radius: 5px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+            width: 300px;
+        }
+        .header {
+            background: #35424a;
+            color: #ffffff;
+            padding: 10px;
+            text-align: center;
+            border-bottom: #e8491d 3px solid;
+            margin: -20px -20px 20px;
+            border-radius: 5px 5px 0 0;
+        }
+        .logo {
+            margin: 0;
+            font-size: 24px;
+        }
+        h2 {
+            color: #35424a;
+            text-align: center;
+        }
+        form {
+            display: flex;
+            flex-direction: column;
+        }
+        label {
+            margin-top: 10px;
+        }
+        input, select {
+            padding: 8px;
+            margin-top: 5px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+        button {
+            background-color: #e8491d;
+            color: white;
+            border: none;
+            padding: 10px;
+            margin-top: 20px;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #d13a0f;
+        }
+        .error {
+            color: red;
+            text-align: center;
+        }
+        p {
+            text-align: center;
+            margin-top: 20px;
+        }
+        a {
+            color: #e8491d;
+            text-decoration: none;
+        }
+        a:hover {
+            text-decoration: underline;
+        }
+    </style>
+    
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1 class="logo">HMS</h1>
+        </div>
+        <h2>Login</h2>
+        <% if (locals.status) { 
+            if(status=="false") {%>
+            <p class="error"> error </p>
+        <% }} %>
+        <form id="loginForm" action="/login/submit" method="POST" >
+            <label for="username">Username:</label>
+            <input type="text" id="username" name="username" required>
+            
+            <label for="password">Password:</label>
+            <input type="password" id="password" name="password" required>
+            
+            <label for="role">Select Role:</label>
+            <select id="role" name="role" required>
+                <option value="">-- Select --</option>
+                <option value="patient">Patient</option>
+                <option value="admin">Admin</option>
+                <option value="receptionist">Receptionist</option>
+                <option value="doctor">Doctor</option>
+            </select>
+            
+            <button type="submit">Login</button>
+        </form>
+        
+    </div>
+</body>
+</html>
