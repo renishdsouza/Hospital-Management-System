@@ -118,13 +118,13 @@ app.post("/login/submit", async (req, res) => {
 
 //reception new patient register button action
 app.post("/reception/newpatienregister", async (req, res) => {
-    let {receptionistdata}=req.body;
-    res.render("new_patient_register.ejs", { receptionnistdatasent:receptionistdata  });
+    let {receptionnistdata}=req.body;
+    res.render("new_patient_register.ejs", { receptionnistdata:receptionnistdata });
 });
 
 //new patient registeration page action
 app.post("/new/patient/register/submit", async (req, res) => {
-    const { receptionnistdatasent, username, password, name, dob, gender, phone, email, address, bloodgroup, medical_history } = req.body;
+    const { receptionnistdata, username, password, name, dob, gender, phone, email, address, bloodgroup, medical_history } = req.body;
     //here we can do this without reconnecting but we have to create a new connection if we want it to be like a transaction
     //begin indicates start of transaction and if there is any issue in the transaction then we will use roll
     //back to cancel the transaction and not make any changes
@@ -143,12 +143,12 @@ app.post("/new/patient/register/submit", async (req, res) => {
         await client.query("COMMIT");
         //if it is true then add to ejs file something to show a message like patiend added successfully for some second or display an alert if true
         //if the value is false then display a message like patient registration failed
-        res.render("reception_dashboard.ejs", { receptionnistdata: receptionnistdatasent, newpatientregisterstatus: "true" });
+        res.render("reception_dashboard.ejs", { receptionnistdata: receptionnistdata, newpatientregisterstatus: "true" });
 
     } catch (error) {
         await client.query("ROLLBACK");
         console.error("Transaction failed:", error);
-        res.render("reception_dashboard.ejs", { receptionnistdata: receptionnistdatasent, newpatientregisterstatus: "false" });
+        res.render("reception_dashboard.ejs", { receptionnistdata: receptionnistdata, newpatientregisterstatus: "false" });
     } finally {
         client.release();
     }
@@ -156,17 +156,17 @@ app.post("/new/patient/register/submit", async (req, res) => {
 
 //appoinment schedule receptionist stage1
 app.post("/new/appoinment/schedule/reception/stage1",async(req,res)=>{
-    const{receptionnistdatarecieved,dob,gender,phone}=req.body;
+    const{receptionnistdata,dob,gender,phone}=req.body;
     
     try{
         let patientquerresult;
         patientquerresult=await pool.query("SELECT * FROM patient WHERE phone=$1 AND gender=$2 AND dob=$3",
             [phone,gender,dob]);
             if(patientquerresult.rows.length>0){
-                res.render("appoinment_scheduler_page_stage2.ejs",{receptiondata:receptionnistdatarecieved,
+                res.render("appoinment_scheduler_page_stage2.ejs",{receptiondata:receptionnistdata,
                     patientdetails:patientquerresult.rows[0]});
                     } else{
-                        res.render("reception_dashboard.ejs",{receptionnistdata:receptionnistdatarecieved,patientfound:"false"});
+                        res.render("reception_dashboard.ejs",{receptionnistdata:receptionnistdata,patientfound:"false"});
                     }
     }
     catch{
@@ -178,12 +178,12 @@ app.post("/new/appoinment/schedule/reception/stage1",async(req,res)=>{
 // appoinment schedule,stage 2 to stage 3 send logic now below is  stage 2 we have to confirm the patient details
 app.post("/new/appoinment/schedule/reception/stage2", async (req, res)=>{
     const {patientdetails,receptionnistdata}=req.body;
-    res.render("appoinment_scheduler_page_stage3.ejs",{patientdata:patientdetails,receptiondata:receptionnistdata});
+    res.render("appoinment_scheduler_page_stage3.ejs",{patientdata:patientdetails,receptionnistdata:receptionnistdata});
 });
 
 //appoinment schedule stage 3
 app.post("/new/appoinment/schedule/reception/stage3", async (req, res)=>{
-    const{patiendata,receptiondata}=req.body;
+    const{patiendata,receptionnistdata}=req.body;
     //now here upon choosing a specialist all the doctor names must be given under select option 
     //ask rithvik how this will be implemtned in frontend
     //now before deciding anything in the temp database only timing is available maybe under assumtion that
@@ -196,7 +196,6 @@ app.post("/new/appoinment/schedule/reception/stage3", async (req, res)=>{
     //error message in frontend and also we might have to maintain a limit of appoinments for each day
     //my choice is to go with the first approach with doctor available on all days
 });
-//apoinment token number  page with date and token number and doctor name
 
 //go back to dashboard reception
 app.post("/reception/dashboard", async (req, res) => {
