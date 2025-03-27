@@ -189,8 +189,11 @@ app.post("/new/appoinment/schedule/reception/stage2/confirm", async (req, res)=>
     res.render("appoinment_scheduler_page_stage3.ejs",{patientdata:patientdetails,receptionnistdata:receptionnistdata});
 });
 
-//appoinment schedule stage 3
+//appoinment schedule stage 3 here patien will have to choose a specialization this needs to be a 
+//separate form in html where upon selecting a option i will get a method=post and action as
+// the path specified down /new/appoinmets/....
 app.post("/new/appoinment/schedule/reception/stage3/specialization", async (req, res)=>{
+    //ignore the coments below inside this
     //now here upon choosing a specialist all the doctor names must be given under select option 
     //ask rithvik how this will be implemtned in frontend
     //now before deciding anything in the temp database only timing is available maybe under assumtion that
@@ -204,11 +207,65 @@ app.post("/new/appoinment/schedule/reception/stage3/specialization", async (req,
     //my choice is to go with the first approach with doctor available on all days
 //so here after choosing the specialization we will renser the doctor names available
 const{patiendata,receptionnistdata,specialization}=req.body;
+try{
+    let doctorqueryresult;
+    doctorqueryresult=await pool.query("SELECT * FROM doctor WHERE specialization=$1",[specialization]);
+    if(doctorqueryresult.rows.length>0){
+        res.render("appoinment_scheduler_page_stage3.ejs",{patientdata:patiendata,receptionnistdata:receptionnistdata,doctors:doctorqueryresult.rows});
+    }else{
+        console.log("doctor specialization error");
+    }
+
+}
+catch{
+    console.error("Error in appoinment scheduler stage 3");
+
+}
 
 
 });
+//but we need to ensure doctor names are unique at present within the same specialization
+//after choosing doctor date and time the second will have this within the same page
+app.post("/add/appoinment",async (req,res)=>{
+    const{patiendata,receptionnistdata,selected_doctor_name,specialization,date,time}=req.body;
+    let doctorqueryresult;
+    try{
+        doctorqueryresult=await pool.query("SELECT * FROM doctor WHERE specialization=$1 AND name=$2",[specialization,selected_doctor_name]);
+        if(doctorqueryresult.rows.length>0){
+            const doctorid=doctorqueryresult.rows[0].doctor_id;
+            const client=await pool.connect();
+            try{
+                await client.query("BEGIN");
+                const appionmentinsertquery="INSERT INTO appointment (doctor_id,patient_id,date,time) VALUES ($1,$2,$3,$4)";
+                const appionmentinsertresult=await client.query(appionmentinsertquery,[doctorid,patiendata.id,date,time]);
+                await client.query("COMMIT");
+                res.redirect("/new/appoinment/schedule/reception/stage4",{receptiondata:receptionnistdata});
+            }
+            catch (error) {
+                await client.query("ROLLBACK");
+                console.error("Transaction failed:", error);
+                res.redirect("/new/appointment/reception/failed",{receptionnistdata:receptionnistdata});
+            } finally {
+                client.release();
+            }
 
-//go back to dashboard reception
+        }
+    }
+    catch (error){
+        console.error("Error in appoinment scheduler");
+    }
+});
+//succesful appoinmet scheduled message and go back to dashboard button
+app.post("/new/appoinment/schedule/reception/stage4",async(req,res)=>{
+    const{receptiondata}=req.body;
+    res.render("success_appointment_schedule_reception.ejs",{receptiondata:receptiondata});
+});
+//failed appoinmet schedule and also give the button to go back to dashboard
+app.post("/new/appointment/reception/failed",async(req,res)=>{
+    const{receptionnistdata}=req.body;
+    res.render("failed_appointment_schedule_reception.ejs",{receptionnistdata:reception});
+});
+//go back to dashboard reception button in the above 2 ejs file
 app.post("/reception/dashboard", async (req, res) => {
     const{receptionnistdata}=req.body;
     res.render("reception_dashboard.ejs",{receptionnistdata:receptionnistdata});
