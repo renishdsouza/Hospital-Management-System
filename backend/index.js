@@ -49,7 +49,7 @@ app.post("/login/submit", async (req, res) => {
                     //'SELECT * FROM "Patient" WHERE user_id=$1' and use "SELECT * FROM Patient WHERE user_id=$1" then 
                     //patient will be converted to lowercase so it will say table doesn't exist
                     patientresult = await pool.query(
-                        "SELECT * FROM patient WHERE user_id=$1",
+                        'SELECT * FROM "patient" WHERE user_id=$1',
                         [result.rows[0].user_id]
                     );
                 } catch (err) {
@@ -64,7 +64,7 @@ app.post("/login/submit", async (req, res) => {
                 let doctorresult;
                 try {
                     doctorresult = await pool.query(
-                        "SELECT * FROM doctor WHERE user_id=$1",
+                        'SELECT * FROM "doctor" WHERE user_id=$1',
                         [result.rows[0].user_id]
                     );
                 } catch (err) {
@@ -80,7 +80,7 @@ app.post("/login/submit", async (req, res) => {
                 let adminresult;
                 try {
                     adminresult = await pool.query(
-                        "SELECT * FROM admin WHERE user_id=$1",
+                        'SELECT * FROM "admin" WHERE user_id=$1',
                         [result.rows[0].user_id]
                     );
                 } catch (err) {
@@ -95,7 +95,7 @@ app.post("/login/submit", async (req, res) => {
                 let receptionistresult;
                 try {
                     receptionistresult = await pool.query(
-                        "SELECT * FROM receptionist WHERE user_id=$1",
+                        'SELECT * FROM "receptionist" WHERE user_id=$1',
                         [result.rows[0].user_id]
                     );
                 } catch (err) {
@@ -136,10 +136,12 @@ app.post("/new/patient/register/submit", async (req, res) => {
         const userId = userResult.rows[0].user_id;
 
         //patient table insert
-        const patientInsertQuery = "INSERT INTO patient (user_id, name, dob, gender, phone, email, address, bloodgroup, medical_history) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9)";
+        const patientInsertQuery = 'INSERT INTO "patient" (user_id, name, dob, gender, phone, email, address, bloodgroup, medical_history) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9)';
         await client.query(patientInsertQuery, [userId, name, dob, gender, phone, email, address, bloodgroup, medical_history]);
 
         await client.query("COMMIT");
+        //if it is true then add to ejs file something to show a message like patiend added successfully for some second or display an alert if true
+        //if the value is false then display a message like patient registration failed
         res.render("reception_dashboard.ejs", { receptionnistdata: receptionnistdatasent, newpatientregisterstatus: "true" });
 
     } catch (error) {
