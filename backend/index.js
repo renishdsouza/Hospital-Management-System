@@ -31,7 +31,7 @@ pool.connect()
 app.get('/', async (req, res) => {
     res.render("login.ejs");
 });
-
+//on all dashboard add a logout button
 // Login Route
 app.post("/login/submit", async (req, res) => {
     const { username, password, role } = req.body;
@@ -313,6 +313,99 @@ app.post("/patients/dashboard",async (req,res)=>{
     const{patientdata}=req.body;
     res.render("patient_dashboard.ejs",{patientdata:patientdata});
 });
+//doctor dashboard view appointments button
+app.post("/doctor/dashboard/appoinments",async (req,res)=>{
+    const{doctordata}=req.body;
+    res.render("doctor_appointment_view_date_selector.ejs",{doctordata:doctordata});
+   
+});
+//allow option to choose a date and click submit and after displayin appointments there will be a button for
+//go back to dashboard
+app.post("/doctor/dashboard/appoinments/date",async (req,res)=>{
+    const{doctordata,date}=req.body;
+    try{
+        let doctorappoinmentsresult;
+        doctorappoinmentsresult=await pool.query("SELECT appointment.*, patient.username AS patient_username FROM appointment JOIN patient ON appointment.patient_id = patient.patient_id WHERE appointment.doctor_id = $1 AND appointment.date = $2",[doctordata.doctor_id,date]);
+        if(doctorappoinmentsresult.rows.length>0)
+            //here we are sending the patien names and username to uniquely identify patients
+            res.render("doctor_display_appointments.ejs",{doctordata:doctordata,appoimentsdata:doctorappoinmentsresult.rows});
+        else
+            res.render("doctor_no_appointments_there_page.ejs",{doctordata:doctordata});
+    } catch{
+        console.log("Error in doctor view appointments page");
+    }
+});
+//update appointment details of the day button fuctionality available on the display appointment page
+//from the appointments he choose the patient username and patient name
+app.post("/doctor/dashboard/appoinments/update",async (req,res)=>{
+    const{doctordata,appointmentdata}=req.body;
+    res.render("appointment_status_update.ejs",{doctordata:doctordata,appointmentdata:appointmentdata});
+});
+//update appointment status page upon submit of the username of patient 
+app.post("/doctor/dashboard/appoinments/update/status",async (req,res)=>{
+    const{doctordata,appointmentdata,username,status}=req.body;
+    try{
+        let patientresult;
+        patientresult=await pool.query("SELECT patient_id FROM patient WHERE username = $1",[username]);
+        let patientid=patientresult.rows[0].patient_id;
+        const client=await pool.connect();
+        try{
+           await client.query("BEGIN");
+           await client.query("UPDATE appointment SET status = $1 WHERE patient_id=$2 AND doctor_id=$3,AND date=$4",[status,patientid,doctordata.doctor_id,appointmentdata.rows[0].date]);
+           await client.query("COMMIT");
+                       //in the below rendered page add the go back to dashboard button
+           res.render("appointment_status_updated.ejs",{doctordata:doctordata});
+        }
+        catch(error){
+            await client.query("ROLLBACK");
+            console.log("Error in updating appointment status");
+            //in the below rendered page add the go back to dashboard button
+            res.render("appointment_status_update_failed.ejs",{doctordata:doctordata});
+        }
+    }
+    catch{
+        console.log("Error in finding patiend id while appointment update from doctor");
+    }
+});
+//from the display appointments page add medical record button
+app.post("/doctor/dashboard/appoinments/medicalrecord",async (req,res)=>{
+    const{doctordata,appointmentdata}=req.body;
+    //remember we are not giving him an optinon to choose any date that we will have to store in the medical
+    //records table
+    res.render("add_medical_record_page.ejs",{doctordata:doctordata,appointmentdata:appointmentdata});
+});
+//now we will recive the patient username and the details of the colums of medical records
+app.post("/doctor/dashboard/appoinments/medicalrecord/add",async (req,res)=>{
+    const{doctordata,username,diagnosis,prescription}=req.body;
+    try{
+        let patientresult;
+        patientresult=await pool.query("SELECT patient_id FROM patient WHERE username = $1",[username]);
+        let patientid=patientresult.rows[0].patient_id;
+        const client=await pool.connect();
+        try{
+           await client.query("BEGIN");
+           await client.query("INSERT INTO medicalrecords (patient_id, doctor_id, diagnosis, prescription) VALUES ($1, $2, $3, $4)",[patientid,doctordata.doctor_id,diagnosis,prescription]);
+           await client.query("COMMIT");
+                       //in the below rendered page add the go back to dashboard button
+           res.render("medical_record_added_page.ejs",{doctordata:doctordata});
+        }
+        catch(error){
+            await client.query("ROLLBACK");
+            console.log("Error in adding medical recors");
+            //in the below rendered page add the go back to dashboard button
+            res.render("medical_record_add_fail.ejs",{doctordata:doctordata});
+        }
+    }
+    catch{
+        console.log("Error in finding patiend id while appointment update from doctor");
+    }
+
+});
+//go back to doctor dashboard button
+app.post("/doctor/dashboard",async (req,res)=>{
+    const{doctordata}=req.body;
+    res.render("doctor_dashboard.ejs",{doctordata:doctordata});
+});
 
 //logout
 app.get("/logout",async (req, res) => {
@@ -328,3 +421,9 @@ app.listen(port, () => {
 //alos footer page hospital address,phone number and meet the team link
 //for doctor from view appoinmets we can have appoinments status update and do this by sendin the appoinmets data received here to the next page also that is update appoinment data and then add a medical records also
 //also it might be better to include appoinment id also in medical record table maybe discuss
+//remember in doctor page date and time shouldn't be set required as default value will handle
+
+//start from here
+// 1)adding a direct button to update status
+// 2)and a direct button to add medical records
+// 3)also add admin page services
