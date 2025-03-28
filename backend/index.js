@@ -186,7 +186,13 @@ app.post("/new/appoinment/schedule/reception/stage1",async(req,res)=>{
 // appoinment schedule,stage 2 to stage 3 send logic now below is  stage 2 we have to confirm the patient details
 app.post("/new/appoinment/schedule/reception/stage2/confirm", async (req, res)=>{
     const {patientdetails,receptionnistdata}=req.body;
-    res.render("appoinment_scheduler_page_stage3.ejs",{patientdata:patientdetails,receptionnistdata:receptionnistdata});
+    try{
+        let doctorspecialization;
+        doctorspecialization=await pool.query("SELECT DISTINCT specialization FROM doctor");
+    res.render("appoinment_scheduler_page_stage3.ejs",{patientdata:patientdetails,receptionnistdata:receptionnistdata,specialization:doctorspecialization.rows});
+    } catch(error){
+        console.log("unable to get doctor specialization");
+    }
 });
 
 //appoinment schedule stage 3 here patien will have to choose a specialization this needs to be a 
