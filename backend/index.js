@@ -372,6 +372,7 @@ app.post("/doctor/dashboard/appoinments/medicalrecord",async (req,res)=>{
     const{doctordata,appointmentdata}=req.body;
     //remember we are not giving him an optinon to choose any date that we will have to store in the medical
     //records table
+    //in the below page the doctor must enter patient username along with diagnosis,prescription
     res.render("add_medical_record_page.ejs",{doctordata:doctordata,appointmentdata:appointmentdata});
 });
 //now we will recive the patient username and the details of the colums of medical records
@@ -380,6 +381,10 @@ app.post("/doctor/dashboard/appoinments/medicalrecord/add",async (req,res)=>{
     try{
         let patientresult;
         patientresult=await pool.query("SELECT patient_id FROM patient WHERE username = $1",[username]);
+        if(patientresult.rows.length<=0)
+            //add go back to dashboard button also
+            res.render("invalid_patient_details_page.ejs",{doctordata:doctordata});
+        else{    
         let patientid=patientresult.rows[0].patient_id;
         const client=await pool.connect();
         try{
@@ -396,17 +401,45 @@ app.post("/doctor/dashboard/appoinments/medicalrecord/add",async (req,res)=>{
             res.render("medical_record_add_fail.ejs",{doctordata:doctordata});
         }
     }
+    }
     catch{
         console.log("Error in finding patiend id while appointment update from doctor");
     }
 
+});
+//update appointment button functionality from dashboard
+app.post("/doctor/dashboard/appoinments/updatestatus",async (req,res)=>{
+    const{doctordata}=req.body;
+    res.render("direct_status_update_appointment.ejs",{doctordata:doctordata});
+});
+//update appointment status after date is submitted from form 
+app.post("/doctor/dashboard/appoinments/date",async (req,res)=>{
+    const{doctordata,date}=req.body;
+    try{
+        let doctorappoinmentsresult;
+        doctorappoinmentsresult=await pool.query("SELECT appointment.*, patient.username AS patient_username FROM appointment JOIN patient ON appointment.patient_id = patient.patient_id WHERE appointment.doctor_id = $1 AND appointment.date = $2",[doctordata.doctor_id,date]);
+        if(doctorappoinmentsresult.rows.length>0)
+            //here we are sending the patien names and username to uniquely identify patients
+            res.redirect("/doctor/dashboard/appoinments/update",{doctordata:doctordata,appointmentdata:doctorappoinmentsresult.rows});
+        else
+            res.render("doctor_no_appointments_there_page.ejs",{doctordata:doctordata});
+    } catch{
+        console.log("Error in doctor view appointments page");
+    }
+    
+});
+//add medical records functionality
+app.post("/doctor/dashboard/appoinments/medicalrecord/add",async (req,res)=>{
+    const{doctordata}=req.body;
+    //in this page the doctor will have to enter paitent username
+    res.render("add_medical_record_page.ejs",{doctordata:doctordata});
 });
 //go back to doctor dashboard button
 app.post("/doctor/dashboard",async (req,res)=>{
     const{doctordata}=req.body;
     res.render("doctor_dashboard.ejs",{doctordata:doctordata});
 });
-
+//decide and add what all admin functionalities must be there
 //logout
 app.get("/logout",async (req, res) => {
     res.redirect("/");
