@@ -439,7 +439,142 @@ app.post("/doctor/dashboard",async (req,res)=>{
     const{doctordata}=req.body;
     res.render("doctor_dashboard.ejs",{doctordata:doctordata});
 });
-//decide and add what all admin functionalities must be there
+
+//admin add new user button functionality
+app.post("/admin/dashboard/users/add",async (req,res)=>{
+    const{admindata}=req.body;
+    res.render("add_user_page.ejs",{admindata:admindata});
+});
+//admin add new user page here there will be next button upon clicking that request will come to below
+app.post("/admin/add/new/user/stage1",async (req,res)=>{
+    //username password and role 
+    const{admindata,username,password,role}=req.body;
+    //here we are checking if the username is already taken
+   let usercheck= pool.query("SELECT * FROM user WHERE username = $1",[username]);
+   if(usercheck.rows.length>0)
+        res.render("add_user_page.ejs",{admindata:admindata, useralreadypresent:"true"});
+    else{
+    
+        const client = await pool.connect();
+    try {
+        await client.query("BEGIN");
+        //user table insert first
+        const userInsertQuery = 'INSERT INTO "user" (username, password, role) VALUES ($1, $2, $3) RETURNING user_id';
+        const userResult = await client.query(userInsertQuery, [username, password, role]);
+        const userId = userResult.rows[0].user_id;
+        await client.query("COMMIT");
+        if(role=="patient")
+            res.render("add_patient_page.ejs",{admindata:admindata,userid:userId});
+        else if(role=="doctor")
+                res.render("add_doctor_page.ejs",{admindata:admindata,userid:userId});
+            else
+            res.render("add_receptionist_page.ejs",{admindata:admindata,userid:userId});
+
+
+    } catch (error) {
+        await client.query("ROLLBACK");
+        console.error("Transaction failed:", error);
+        console.log("unable to add into user table by admin");
+        await client.query("ROLLBACK");
+    } finally {
+        client.release();
+    }
+    }
+});
+//new patient add by admin
+app.post("/admin/add/new/patient/stage2",async (req,res)=>{
+    const{admindata,userid,name, dob, gender, phone, email, address, bloodgroup, medical_history}=req.body;
+    const client = await pool.connect();
+    try {
+        await client.query("BEGIN");
+        const patientInsertQuery = 'INSERT INTO "patient" (user_id, name, dob, gender, phone, email, address, bloodgroup, medical_history) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9)';
+        await client.query(patientInsertQuery, [userId, name, dob, gender, phone, email, address, bloodgroup, medical_history]);
+        await client.query("COMMIT");
+        //this page must contain a button to go back to dashboard
+        res.render("sucessfully_added_admin.ejs",{admindata:admindata});
+    } catch(error){
+        console.log("unable to add into patient table by admin");
+        await client.query("ROLLBACK");
+        //deleting user table entry also
+        await client.query('DELETE FROM "user" WHERE username = $1', [username]);
+        //also add go back to dashboard button
+        res.render("failed_to_add_by_admin.ejs",{admindata:admindata});
+    }finally{
+        client.release();
+    }
+
+});
+//new doctor add by admin
+app.post("/admin/add/new/doctor/stage2",async (req,res)=>{
+    const{admindata,userid,name,specialization,phone,email,availability}=req.body;
+    const client = await pool.connect();
+    try {
+        await client.query("BEGIN");
+        const doctorInsertQuery = 'INSERT INTO "doctor" (user_id, name, phone, email,specialization,availability) VALUES ($1,$2,$3,$4,$5)';
+        await client.query(doctorInsertQuery, [userid, name,phone,email,specialization,availability]);
+        await client.query("COMMIT");
+        res.render("sucessfully_added_admin.ejs",{admindata:admindata});
+    } catch(error){
+        console.log("unable to add into doctor table by admin");
+        await client.query("ROLLBACK");
+        await client.query('DELETE FROM "user" WHERE username = $1', [username]);
+        res.render("failed_to_add_by_admin.ejs",{admindata:admindata});
+    }finally{
+        client.release();
+    }
+});
+//new receptionist add by admin
+app.post("/admin/add/new/receptionist/stage2",async (req,res)=>{
+    const{admindata,userid,name,phone,email}=req.body;
+    const client = await pool.connect();
+    try {
+        await client.query("BEGIN");
+        const receptionInsertQuery = 'INSERT INTO "receptionist" (user_id, name, phone, email) VALUES ($1,$2,$3,$4)';
+        await client.query(receptionInsertQuery, [userid, name,phone,email]);
+        await client.query("COMMIT");
+        res.render("sucessfully_added_admin.ejs",{admindata:admindata});
+        }catch(error){
+            console.log("unable to add into receptionist table by admin");
+            await client.query("ROLLBACK");
+            await client.query('DELETE FROM "user" WHERE username = $1', [username]);
+            res.render("failed_to_add_by_admin.ejs",{admindata:admindata});
+        }finally{
+            client.release();
+        }
+});
+
+//admin remove user button functionality
+app.post("/admin/remove/user",async (req,res)=>{
+    const{admindata}=req.body;
+    res.render("admin_remove_user.ejs",{admindata:admindata});
+});
+//admin remove user functionality from form
+app.post("/admin/remove/user/username",async (req,res)=>{
+    const{admindata,username}=req.body;
+    try {
+        await client.query("BEGIN");
+        // Delete user (this will cascade delete related records)
+        const deleteUserQuery = 'DELETE FROM "user" WHERE username = $1';
+        await client.query(deleteUserQuery, [username]);
+        await client.query("COMMIT");
+        //add go back to dashboard button also
+        res.render("sucessfully_removed_user.ejs",{admindata:admindata});
+        console.log("User and all related records deleted successfully");
+    } catch (error) {
+        await client.query("ROLLBACK"); // Revert changes if an error occurs
+        console.error("Error deleting user:", error);
+        //add button to go back to dashboard also
+        res.render("failed_to_remove_by_admin.ejs",{admindata:admindata});
+    } finally {
+        client.release();
+    }
+});
+//update queries
+//admin go back to dashboard
+app.get("/admin/dashboard",async (req,res)=>{
+    const{admindata}=req.body;
+    res.render("admin_dashboard.ejs",{admindata:admindata});
+});
 //logout
 app.get("/logout",async (req, res) => {
     res.redirect("/");
