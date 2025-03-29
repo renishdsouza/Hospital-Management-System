@@ -299,11 +299,12 @@ app.post("/patients/medical/records",async (req,res)=>{
     const{patientdata}=req.body;
     try{
         let patientmedicalrecordresult;
-        patientmedicalrecordresult=await pool.query("SELECT * FROM medical_record WHERE patient_id = $1 ORDER BY visit_date",patientdata.patient_id);
+        //left join so that null dcotor name will also come as doctor might be deleted but patient medical record won't
+        patientmedicalrecordresult=await pool.query("SELECT m.visit_date, m.diagnosis, m.prescription,d.name AS doctor_name, d.specialization FROM medicalrecords m LEFT JOIN doctor d ON m.doctor_id = d.doctor_id WHERE m.patient_id = $1 ORDER BY m.visit_date DESC",[patientdata.patient_id]);
         if(patientmedicalrecordresult.rows.length>0)
-        res.render("patient_view_medical_record_page.ejs",{patientdata:patientdata,medicalrecords:patientmedicalrecordresult,norecords:"false"});
+        res.render("patient_view_medical_record_page.ejs",{patientdata:patientdata,medicalrecords:patientmedicalrecordresult});
     else
-        res.render("patient_view_medical_record_page.ejs",{patientdata:patientdata,norecords:"true"});
+        res.render("patient_dashboard.ejs",{patientdata:patientdata,norecords:"true"});
     }
     catch{
         console.error("Error in patient view medical records page");
