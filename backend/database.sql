@@ -36,7 +36,7 @@ CREATE TABLE patient (
 CREATE TABLE doctor (
     doctor_id SERIAL PRIMARY KEY,
     user_id INT UNIQUE NOT NULL,
-    name VARCHAR(100) NOT NULL,
+    name VARCHAR(100) NOT NULL, 
     specialization VARCHAR(100) NOT NULL,
     phone VARCHAR(15) UNIQUE NOT NULL,
     email VARCHAR(100) UNIQUE NOT NULL,
@@ -127,3 +127,16 @@ INSERT INTO receptionist (user_id, name, email, phone) VALUES
 -- Insert Admin
 INSERT INTO "admin" (user_id, name, email, phone) VALUES
 (12, 'Alice admin', 'alice.admin@example.com', '9876543230');
+-- Insert Appointments for Patient ID 1
+INSERT INTO appointment (patient_id, doctor_id, date, time, status) VALUES
+(1, 1, '2025-04-01', '10:00:00', 'Scheduled'),  -- Dr. Adam White
+(1, 2, '2025-04-05', '14:30:00', 'Completed'),  -- Dr. Laura Green
+(1, 3, '2025-04-10', '09:00:00', 'Cancelled'),  -- Dr. Kevin Black
+(1, 4, '2025-04-15', '11:00:00', 'Scheduled');  -- Dr. Sophia Blue
+
+-- Insert Medical Records for Patient ID 1
+INSERT INTO medicalrecords (patient_id, doctor_id, diagnosis, prescription, visit_date) VALUES
+(1, 1, 'Mild Hypertension', 'Prescribed beta-blockers', '2025-04-05 14:30:00'),
+(1, 2, 'Skin Rash', 'Prescribed antihistamines', '2025-04-10 09:30:00');
+
+
