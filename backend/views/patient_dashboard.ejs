@@ -4,9 +4,9 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Patient Dashboard | Hospital Management System</title>
-    <link rel="stylesheet" href="/styles.css">
 </head>
 <body>
+    <%-include("header_logout.ejs")%>
     <div class="container">
         <h1 class="header">HMS</h1>
         <div class="content">
@@ -14,8 +14,18 @@
             <h2>Welcome, <%= patientdata.name %></h2>
     
             <%}%>
-            <p>See your <a href="/appointments">appointments</a></p>
+            <form action="/patient/appoinment" method="post">
+                <input type="hidden" name="patientdata" value="<%= patientdata %>">
+                <button type="submit">View Appoinments</button>
+
+            </form>
+            <form action="/patients/medical/records" method="post">
+                <input type="hidden" name="patientdata" value="<%= patientdata %>">
+                <button type="submit">View Medical Records</button>
+            </form>
         </div>
     </div>
+    <%-include("footer.ejs")%>
+
 </body>
 </html>
