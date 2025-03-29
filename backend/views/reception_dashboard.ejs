@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RECEPTIONIST Dashboard</title>
+    <style>
+        .success-message {
+            background-color: #4CAF50;
+            color: white;
+            padding: 10px;
+            margin: 10px 0;
+            display: none;
+        }
+        .error-message {
+            background-color: #FF5733;
+            color: white;
+            padding: 10px;
+            margin: 10px 0;
+            display: none;
+        }
+        .not-found-message {
+            background-color: #FFC107;
+            color: black;
+            padding: 10px;
+            margin: 10px 0;
+            display: none;
+        }
+    </style>
+    <script>
+        document.addEventListener("DOMContentLoaded", function() {
+            const successMessage = document.getElementById("success-message");
+            const errorMessage = document.getElementById("error-message");
+            const notFoundMessage = document.getElementById("not-found-message");
+
+            if (successMessage) {
+                successMessage.style.display = "block";
+                setTimeout(() => {
+                    successMessage.style.display = "none";
+                }, 3000);
+            }
+            if (errorMessage) {
+                errorMessage.style.display = "block";
+                setTimeout(() => {
+                    errorMessage.style.display = "none";
+                }, 3000);
+            }
+            if (notFoundMessage) {
+                notFoundMessage.style.display = "block";
+                setTimeout(() => {
+                    notFoundMessage.style.display = "none";
+                }, 3000);
+            }
+        });
+    </script>
+</head>
+<body>
+    <%- include("header_logout.ejs") %>
+    <div class="container">
+        <h1 class="header">HMS</h1>
+        <div class="content">
+            <h2>Welcome, <%= receptionistdata.name ? receptionistdata.name : "RECEPTIONIST" %></h2>
+
+            <!-- Success Message -->
+            <% if (typeof newpatientregisterstatus !== 'undefined') { %>
+                <% if (newpatientregisterstatus === "true") { %>
+                    <div id="success-message" class="success-message">Patient registered successfully!</div>
+                <% } else if (newpatientregisterstatus === "false") { %>
+                    <div id="error-message" class="error-message">Patient registration failed. Please try again.</div>
+                <% } %>
+            <% } %>
+
+            <!-- Patient Not Found Message -->
+            <% if (typeof patientfound !== 'undefined' && patientfound === "false") { %>
+                <div id="not-found-message" class="not-found-message">Patient not found. Please check details.</div>
+            <% } %>
+
+            <!-- Register New Patient Form -->
+            <form action="/reception/newpatienregister" method="post">
+                <input type="hidden" name="receptionistdata" value="<%= JSON.stringify(receptionistdata) %>">
+                <button type="submit">Register New Patient</button>
+            </form>
+
+            <!-- Schedule Appointment Form -->
+            <form action="/appoinment/reception/schedule" method="post">
+                <input type="hidden" name="receptionistdata" value="<%= JSON.stringify(receptionistdata) %>">
+                <button type="submit">Schedule Appointment</button>
+            </form>
+        </div>
+    </div>
+    <%- include("footer.ejs") %>
+</body>
+</html>
