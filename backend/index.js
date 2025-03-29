@@ -184,21 +184,25 @@ app.post("/appoinment/reception/schedule", (req, res) => {
 app.post("/new/appoinment/schedule/reception/stage1", async (req, res) => {
     let { receptionistdata, dob, username } = req.body;
 
-    // Parse receptionistdata if it's a JSON string
+    // Ensure receptionistdata is already an object
     try {
-        receptionistdata = JSON.parse(receptionistdata);
+        receptionistdata = typeof receptionistdata === "string" ? JSON.parse(receptionistdata) : receptionistdata;
     } catch (error) {
         console.error("Error parsing receptionistdata:", error);
+        receptionistdata = {}; // Fallback to empty object
     }
 
     try {
-        let resultuser = await pool.query('SELECT * FROM "user" WHERE username=$1', [username]);
+        const resultuser = await pool.query('SELECT * FROM "user" WHERE username=$1', [username]);
         if (resultuser.rows.length > 0) {
             const userid = resultuser.rows[0].user_id;
             const patientquerresult = await pool.query("SELECT * FROM patient WHERE user_id=$1 AND dob=$2", [userid, dob]);
 
             if (patientquerresult.rows.length > 0) {
-                res.render("appointment_scheduler_page_stage2.ejs", { receptionistdata, patientdetails: patientquerresult.rows[0] });
+                const patientdetails = patientquerresult.rows[0];
+                patientdetails.age = calculateAge(patientdetails.dob); // Add age based on DOB
+
+                res.render("appointment_scheduler_page_stage2.ejs", { receptionistdata, patientdetails });
             } else {
                 res.render("reception_dashboard.ejs", { receptionistdata, patientfound: "false" });
             }
@@ -210,24 +214,44 @@ app.post("/new/appoinment/schedule/reception/stage1", async (req, res) => {
     }
 });
 
+// Helper function to calculate age from DOB
+function calculateAge(dob) {
+    const birthDate = new Date(dob);
+    const today = new Date();
+    let age = today.getFullYear() - birthDate.getFullYear();
+    const monthDifference = today.getMonth() - birthDate.getMonth();
+    if (monthDifference < 0 || (monthDifference === 0 && today.getDate() < birthDate.getDate())) {
+        age--;
+    }
+    return age;
+}
+
+
+
 
 // appoinment schedule,stage 2 to stage 3 send logic now below is  stage 2 we have to confirm the patient details
-app.post("/new/appoinment/schedule/reception/stage2/confirm", async (req, res) => {
+app.post("/new/appointment/schedule/reception/stage2/confirm", async (req, res) => {
     let { patientdetails, receptionistdata } = req.body;
 
-    // Parse receptionistdata if it's a JSON string
+    // Ensure receptionistdata and patientdetails are objects
     try {
-        receptionistdata = JSON.parse(receptionistdata);
+        receptionistdata = typeof receptionistdata === "string" ? JSON.parse(receptionistdata) : receptionistdata;
+        patientdetails = typeof patientdetails === "string" ? JSON.parse(patientdetails) : patientdetails;
     } catch (error) {
-        console.error("Error parsing receptionistdata:", error);
+        console.error("Error parsing data:", error);
+        // Fallback to empty objects if parsing fails
+        receptionistdata = {};
+        patientdetails = {};
     }
 
     try {
         const { rows: doctorspecialization } = await pool.query("SELECT DISTINCT specialization FROM doctor");
-        res.render("appoinment_scheduler_page_stage3.ejs", {
-            patientdata: patientdetails,
-            receptionistdata,
-            specialization: JSON.stringify(doctorspecialization),
+
+        res.render("appointment_scheduler_page_stage3.ejs", {
+            patientdata: patientdetails || {}, // Pass patient details
+            receptionistdata: receptionistdata || {}, // Pass receptionist data
+            specialization: doctorspecialization, // Pass specialization as an array of objects
+            doctors: undefined, // Initialize doctors as undefined
         });
     } catch (error) {
         console.error("Unable to get doctor specialization:", error);
@@ -235,119 +259,168 @@ app.post("/new/appoinment/schedule/reception/stage2/confirm", async (req, res) =
 });
 
 
+
+
+
 //appoinment schedule stage 3 here patien will have to choose a specialization this needs to be a 
 //separate form in html where upon selecting a option i will get a method=post and action as
 // the path specified down /new/appoinmets/....
-app.post("/new/appoinment/schedule/reception/stage3/specialization", async (req, res) => {
-    let { patiendata, receptionnistdata, specialization } = req.body;
+app.post("/new/appointment/schedule/reception/stage3/specialization", async (req, res) => {
+    let { patientdata, receptionistdata, chosen_specialization } = req.body;
 
-    // Parse receptionnistdata if it's a JSON string
+    // Ensure patientdata and receptionistdata are objects
     try {
-        receptionnistdata = JSON.parse(receptionnistdata);
+        patientdata = typeof patientdata === "string" ? JSON.parse(patientdata) : patientdata;
+        receptionistdata = typeof receptionistdata === "string" ? JSON.parse(receptionistdata) : receptionistdata;
     } catch (error) {
-        console.error("Error parsing receptionnistdata:", error);
+        console.error("Error parsing data:", error);
+        // Fallback to empty objects if parsing fails
+        patientdata = {};
+        receptionistdata = {};
     }
 
-    try {
-        const { rows: doctorqueryresult } = await pool.query("SELECT * FROM doctor WHERE specialization=$1", [specialization]);
+    console.log("Chosen Specialization:", chosen_specialization); // Debugging log
 
-        if (doctorqueryresult.length > 0) {
-            res.render("appoinment_scheduler_page_stage3.ejs", {
-                patiendata,
-                receptionnistdata,
-                doctors: JSON.stringify(doctorqueryresult),
-            });
-        } else {
-            console.log("Doctor specialization error");
-        }
+    try {
+        const { rows: doctorqueryresult } = await pool.query("SELECT * FROM doctor WHERE specialization=$1", [chosen_specialization]);
+        // console.log("Patient Data:", patientdata);
+
+        res.render("appointment_scheduler_page_stage3.ejs", {
+            patientdata,
+            receptionistdata,
+            doctors: doctorqueryresult, // Pass fetched doctors directly as an array
+            chosen_specialization,
+            specialization: [] // Pass an empty array if needed
+        });
     } catch (error) {
         console.error("Error in appointment scheduler stage 3:", error);
+
+        res.render("appointment_scheduler_page_stage3.ejs", {
+            patientdata,
+            receptionistdata,
+            doctors: [], // Empty array for doctors
+            chosen_specialization,
+            specialization: []
+        });
     }
 });
 
+
+
 //but we need to ensure doctor names are unique at present within the same specialization
 //after choosing doctor date and time the second will have this within the same page
-app.post("/add/appoinment", async (req, res) => {
-    let { patiendata, receptionistdata, selected_doctor_name, specialization, date, time } = req.body;
-
-    // Parse receptionistdata if it's a JSON string
+app.post("/add/appointment", async (req, res) => {
+    let { patientdata, receptionistdata, selected_doctor_name, chosen_specialization, date, time } = req.body;
+    console.log(receptionistdata);
+    // Safely parse JSON strings if necessary
     try {
-        receptionistdata = JSON.parse(receptionistdata);
+        patientdata = typeof patientdata === "string" ? JSON.parse(patientdata) : patientdata;
+        receptionistdata = typeof receptionistdata === "string" ? JSON.parse(receptionistdata) : receptionistdata;
     } catch (error) {
-        console.error("Error parsing receptionistdata:", error);
+        console.error("Error parsing data:", error);
+        // Fallback to empty objects if parsing fails
+        patientdata = {};
+        receptionistdata = {};
     }
+
+    // Validate that patient_id exists
+    if (!patientdata.patient_id) {
+        console.error("Error: patient_id is missing in patientdata");
+        return res.redirect("/new/appointment/reception/failed");
+    }
+
+    console.log("Specialization:", chosen_specialization); // Debugging log
+    console.log("Selected Doctor Name:", selected_doctor_name); // Debugging log
 
     try {
         const doctorqueryresult = await pool.query(
             "SELECT * FROM doctor WHERE specialization=$1 AND name=$2",
-            [specialization, selected_doctor_name]
+            [chosen_specialization, selected_doctor_name]
         );
 
         if (doctorqueryresult.rows.length > 0) {
             const doctorid = doctorqueryresult.rows[0].doctor_id;
             const client = await pool.connect();
-
             try {
                 await client.query("BEGIN");
-                const appionmentinsertquery =
-                    "INSERT INTO appointment (doctor_id,patient_id,date,time) VALUES ($1,$2,$3,$4)";
-                await client.query(appionmentinsertquery, [doctorid, patiendata.id, date, time]);
+                const appointmentInsertQuery =
+                    "INSERT INTO appointment (doctor_id, patient_id, date, time) VALUES ($1, $2, $3, $4)";
+                await client.query(appointmentInsertQuery, [doctorid, patientdata.patient_id, date, time]);
                 await client.query("COMMIT");
-
-                res.redirect("/new/appoinment/schedule/reception/stage4");
+                res.render("success_appointment_schedule_reception.ejs", { receptionistdata });
             } catch (error) {
                 await client.query("ROLLBACK");
                 console.error("Transaction failed:", error);
-                res.redirect("/new/appointment/reception/failed");
+                res.render("failed_appointment_schedule_reception.ejs", { receptionistdata });
             } finally {
                 client.release();
             }
+        } else {
+            console.error("No matching doctor found.");
+            res.render("failed_appointment_schedule_reception.ejs", { receptionistdata });
         }
     } catch (error) {
         console.error("Error in appointment scheduler:", error);
     }
 });
-//appointment success
-app.post("/new/appoinment/schedule/reception/stage4", async (req, res) => {
-    let { receptionistdata } = req.body;
 
+
+
+//appointment success
+app.get("/new/appointment/schedule/reception/stage4", async (req, res) => {
+    let { receptionistdata } = req.query; // Use query parameters instead of req.body for GET requests
+    console.log("hi");
+    console.log(receptionistdata);
     // Parse receptionistdata if it's a JSON string
     try {
-        receptionistdata = JSON.parse(receptionistdata);
+        receptionistdata = typeof receptionistdata === "string" ? JSON.parse(receptionistdata) : receptionistdata;
     } catch (error) {
         console.error("Error parsing receptionistdata:", error);
+        receptionistdata = {}; // Fallback to empty object if parsing fails
     }
 
     res.render("success_appointment_schedule_reception.ejs", { receptionistdata });
 });
+
+
+
+
 //appointment failed
-app.post("/new/appointment/reception/failed", async (req, res) => {
-    let { receptionistdata } = req.body;
+app.get("/new/appointment/reception/failed", async (req, res) => {
+    let { receptionistdata } = req.query; // Use query parameters instead of req.body for GET requests
 
     // Parse receptionistdata if it's a JSON string
     try {
-        receptionistdata = JSON.parse(receptionistdata);
+        receptionistdata = typeof receptionistdata === "string" ? JSON.parse(receptionistdata) : receptionistdata;
     } catch (error) {
         console.error("Error parsing receptionistdata:", error);
+        receptionistdata = {}; // Fallback to empty object if parsing fails
     }
 
     res.render("failed_appointment_schedule_reception.ejs", { receptionistdata });
 });
 
-// Receptionist Dashboard
-app.post("/reception/dashboard", async (req, res) => {
-    let receptionistdata = req.body.receptionistdata;
 
+
+
+
+// Receptionist Dashboard
+app.get("/reception/dashboard", async (req, res) => {
+    let { receptionistdata } = req.query; // Use query parameters instead of req.body for GET requests
+
+    // Parse receptionistdata if it's a JSON string
     try {
-        // Parse receptionistdata if it's a JSON string
         receptionistdata = typeof receptionistdata === "string" ? JSON.parse(receptionistdata) : receptionistdata;
     } catch (error) {
         console.error("Error parsing receptionistdata:", error);
-        receptionistdata = {}; // Default to an empty object if parsing fails
+        receptionistdata = {}; // Fallback to empty object if parsing fails
     }
 
     res.render("reception_dashboard.ejs", { receptionistdata });
 });
+
+
+
 
 
 // in patients page view appointments
