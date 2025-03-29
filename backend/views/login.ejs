@@ -80,7 +80,15 @@
             text-decoration: underline;
         }
     </style>
-    
+    <script>
+        // Hide the "Invalid Credentials" message after 5 seconds
+        setTimeout(() => {
+            const errorMessage = document.getElementById("invalid-credentials");
+            if (errorMessage) {
+                errorMessage.style.display = "none"; // Hide the element
+            }
+        }, 5000);
+    </script>
 </head>
 <body>
     <div class="container">
@@ -89,10 +97,11 @@
         </div>
         <h2>Login</h2>
         <% if (locals.status) { 
-            if(status=="false") {%>
-            <p class="error"> error </p>
+            if(status == "false") { %>
+                <p id="invalid-credentials" class="error">Invalid Credentials</p>
         <% }} %>
-        <form id="loginForm" action="/login/submit" method="POST" >
+        
+        <form id="loginForm" action="/login/submit" method="post">
             <label for="username">Username:</label>
             <input type="text" id="username" name="username" required>
             
@@ -110,7 +119,6 @@
             
             <button type="submit">Login</button>
         </form>
-        
     </div>
 </body>
 </html>
