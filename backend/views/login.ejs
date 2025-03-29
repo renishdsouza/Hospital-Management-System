@@ -1,3 +1,4 @@
+<!-- Updated Login Page -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -39,55 +40,22 @@
             color: #35424a;
             text-align: center;
         }
-        form {
-            display: flex;
-            flex-direction: column;
-        }
-        label {
-            margin-top: 10px;
-        }
-        input, select {
-            padding: 8px;
-            margin-top: 5px;
-            border: 1px solid #ddd;
-            border-radius: 4px;
-        }
-        button {
-            background-color: #e8491d;
-            color: white;
-            border: none;
-            padding: 10px;
-            margin-top: 20px;
-            border-radius: 4px;
-            cursor: pointer;
-        }
-        button:hover {
-            background-color: #d13a0f;
-        }
         .error {
             color: red;
             text-align: center;
-        }
-        p {
-            text-align: center;
-            margin-top: 20px;
-        }
-        a {
-            color: #e8491d;
-            text-decoration: none;
-        }
-        a:hover {
-            text-decoration: underline;
+            display: none;
         }
     </style>
     <script>
-        // Hide the "Invalid Credentials" message after 5 seconds
-        setTimeout(() => {
+        document.addEventListener("DOMContentLoaded", function () {
             const errorMessage = document.getElementById("invalid-credentials");
-            if (errorMessage) {
-                errorMessage.style.display = "none"; // Hide the element
+            if (errorMessage && errorMessage.innerText.trim() !== "") {
+                errorMessage.style.display = "block";
+                setTimeout(() => {
+                    errorMessage.style.display = "none";
+                }, 1500);
             }
-        }, 1500);
+        });
     </script>
 </head>
 <body>
@@ -96,12 +64,12 @@
             <h1 class="logo">HMS</h1>
         </div>
         <h2>Login</h2>
-        <% if (locals.status) { 
-            if(status == "false") { %>
-                <p id="invalid-credentials" class="error">Invalid Credentials</p>
-        <% }} %>
-        
-        <form id="loginForm" action="/login/submit" method="post">
+
+        <% if (typeof status !== "undefined" && status === "false") { %>
+            <p id="invalid-credentials" class="error">Invalid Credentials</p>
+        <% } %>
+
+        <form action="/login/submit" method="post">
             <label for="username">Username:</label>
             <input type="text" id="username" name="username" required>
             
