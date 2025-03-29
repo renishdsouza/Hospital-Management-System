@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>View Appointment Page</title>
+    <style>
+        table {
+            width: 80%;
+            margin: auto;
+            border-collapse: collapse;
+            text-align: center;
+        }
+        th, td {
+            border: 1px solid black;
+            padding: 10px;
+        }
+        th {
+            background-color: lightgray;
+        }
+    </style>
+</head>
+<body>
+    <%- include("header_logout.ejs") %>
+    
+    <div style="text-align: center;">
+        <form action="/patients/dashboard" method="post">
+            <button type="submit">Go Back</button>
+        </form>
+        
+        <h2>Appointments</h2>
+        
+        <% if (appointmentsData.length > 0) { %>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Appointment ID</th>
+                        <th>Doctor Name</th>
+                        <th>Specialization</th>
+                        <th>Date</th>
+                        <th>Time</th>
+                        <th>Status</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <% appointmentsData.forEach(appointment => { %>
+                        <tr>
+                            <td><%= appointment.appointment_id %></td>
+                            <td><%= appointment.doctor_name %></td>
+                            <td><%= appointment.specialization %></td>
+                            <td><%= appointment.date.toDateString() %></td>
+                            <td><%= appointment.time %></td>
+                            <td><%= appointment.status %></td>
+                        </tr>
+                    <% }) %>
+                </tbody>
+            </table>
+        <% } else { %>
+            <p>No appointments found.</p>
+        <% } %>
+    </div>
+
+    <%- include("footer.ejs") %>
+</body>
+</html>
