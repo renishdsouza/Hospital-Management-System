@@ -13,6 +13,7 @@ const app = express();
 const port = 3000;
 
 app.use(bodyParser.urlencoded({ extended: true }));
+app.use(express.json()); // For JSON data
 app.set("view engine", "ejs");
 app.set("views", path.join(__dirname, "views"));
 
@@ -36,86 +37,70 @@ app.get('/', async (req, res) => {
 // Login Route
 app.post("/login/submit", async (req, res) => {
     const { username, password, role } = req.body;
+
     try {
         const result = await pool.query(
             'SELECT * FROM "user" WHERE username = $1 AND password = $2 AND role = $3',
             [username, password, role]
         );
 
-        if (result.rows.length > 0) {
-            if (role === "patient") {
-                let patientresult;
-                try {
-                    //remember postgree is case sensitive in table names if you don't use query like this
-                    //'SELECT * FROM "Patient" WHERE user_id=$1' and use "SELECT * FROM Patient WHERE user_id=$1" then 
-                    //patient will be converted to lowercase so it will say table doesn't exist
-                    patientresult = await pool.query(
-                        'SELECT * FROM "patient" WHERE user_id=$1',
-                        [result.rows[0].user_id]
-                    );
-                } catch (err) {
-                    console.log(err);
-                    res.status(500).send("Server error");
-                }
-                if (patientresult.rows.length > 0)
-                    res.render("patient_dashboard.ejs", { patientdata: patientresult.rows[0] });
-                else
-                    console.log("user entry exists but patient table entry missing");
-            } else if (role === "doctor") {
-                let doctorresult;
-                try {
-                    doctorresult = await pool.query(
-                        'SELECT * FROM "doctor" WHERE user_id=$1',
-                        [result.rows[0].user_id]
-                    );
-                } catch (err) {
-                    console.log(err);
-                    res.status(500).send("Server error");
-                }
-                if (doctorresult.rows.length > 0)
-                    res.render("doctor_dashboard.ejs", { doctordata: doctorresult.rows[0] });
-                else
-                    console.log("user entry exists but doctor table entry missing");
-
-            } else if (role === "admin") {
-                let adminresult;
-                try {
-                    adminresult = await pool.query(
-                        'SELECT * FROM "admin" WHERE user_id=$1',
-                        [result.rows[0].user_id]
-                    );
-                } catch (err) {
-                    console.log(err);
-                    res.status(500).send("Server error");
-                }
-                if (adminresult.rows.length > 0)
-                    res.render("admin_dashboard.ejs", { admindata: adminresult.rows[0] });
-                else
-                    console.log("user entry exists but admin table entry missing");
-            } else {
-                let receptionnistresult;
-                try {
-                    receptionnistresult = await pool.query(
-                        'SELECT * FROM "receptionnist" WHERE user_id=$1',
-                        [result.rows[0].user_id]
-                    );
-                } catch (err) {
-                    console.log(err);
-                    res.status(500).send("Server error");
-                }
-                if (receptionnistresult.rows.length > 0)
-                    res.render("reception_dashboard.ejs", { receptionnistdata: receptionnistresult.rows[0] });
-                else
-                    console.log("user entry exists but reception table entry missing");
-            }
-        } else {
-            res.render("login.ejs", { status: "false" });
+        if (result.rows.length === 0) {
+            return res.render("login.ejs", { status: "false" });
         }
+
+        const user_id = result.rows[0].user_id;
+
+        let query = "";
+        let roleData = {};
+        let dashboardView = "";
+
+        if (role === "patient") {
+            query = 'SELECT * FROM "patient" WHERE user_id=$1';
+            dashboardView = "patient_dashboard.ejs";
+        } else if (role === "doctor") {
+            query = 'SELECT * FROM "doctor" WHERE user_id=$1';
+            dashboardView = "doctor_dashboard.ejs";
+        } else if (role === "admin") {
+            query = 'SELECT * FROM "admin" WHERE user_id=$1';
+            dashboardView = "admin_dashboard.ejs";
+        } else if (role === "receptionist") {
+            query = 'SELECT * FROM "receptionist" WHERE user_id=$1';
+            dashboardView = "reception_dashboard.ejs";
+        } else {
+            return res.status(400).send("Invalid role selected.");
+        }
+
+        const roleResult = await pool.query(query, [user_id]);
+
+        if (roleResult.rows.length === 0) {
+            console.log(`User entry exists but ${role} table entry is missing`);
+            return res.status(404).send(`${role} data not found`);
+        }
+
+        roleData = roleResult.rows[0];
+
+        // ✅ Ensure correct variable names are passed based on role
+        if (role === "patient") {
+            return res.render(dashboardView, {
+                patientdata: roleData, 
+                noappointments: false, 
+                nomedicalrecords: false 
+            });
+        } else if (role === "doctor") {
+            return res.render(dashboardView, { doctordata: roleData });
+        } else if (role === "admin") {
+            return res.render(dashboardView, { admindata: roleData });
+        } else if (role === "receptionist") {
+            return res.render(dashboardView, { receptionistdata: roleData });
+        }
+
     } catch (err) {
-        console.error(err);
+        console.error("Error during login:", err);
         res.status(500).send("Server error");
     }
 });
+
+
 
 //reception new patient register button action
 app.post("/reception/newpatienregister", async (req, res) => {
@@ -278,43 +263,107 @@ app.post("/reception/dashboard", async (req, res) => {
     res.render("reception_dashboard.ejs",{receptionnistdata:receptionnistdata});
 });
 
-//in patients page  view appoinments
-app.post("/patient/appoinment",async (req,res)=>{
-    const{patientdata}=req.body;
-    try{
-        let patientappoinmentsresult;
-        patientappoinmentsresult=await pool.query("SELECT a.appointment_id, a.date, a.time, a.status,d.name AS doctor_name, d.specialization FROM appointment a JOIN doctor d ON a.doctor_id = d.doctor_id WHERE a.patient_id = $1 ORDER BY a.date DESC",[patientdata.patient_id]);
-        if(patientappoinmentsresult.rows.length>0)
-        res.render("patient_view_appoinment_page.ejs",{patientdata:patientdata,appoimentsdata:patientappoinmentsresult});
-    else
-    res.render("patient_dashboard.ejs",{patientdata:patientdata,noappoinments:"true"});
+// in patients page view appointments
+app.post("/patient/appointment", async (req, res) => {
+    let patientdata;
+    
+    try {
+        patientdata = JSON.parse(req.body.patientdata); // Parse JSON string
+    } catch (error) {
+        console.error("Error parsing patient data:", error);
+        return res.status(400).json({ error: "Invalid patient data format" });
     }
-    catch{
-        console.error("Error in patient view appoinment page");
 
+    if (!patientdata || !patientdata.patient_id) {
+        return res.status(400).json({ error: "Invalid patient data" });
+    }
+
+    try {
+        let patientAppointmentsResult = await pool.query(
+            "SELECT a.appointment_id, a.date, a.time, a.status, d.name AS doctor_name, d.specialization " +
+            "FROM appointment a JOIN doctor d ON a.doctor_id = d.doctor_id " +
+            "WHERE a.patient_id = $1 ORDER BY a.date DESC",
+            [patientdata.patient_id]
+        );
+
+        const appointments = patientAppointmentsResult.rows; // Store result in a variable
+
+        // Return JSON if requested
+        if (req.headers.accept === "application/json") {
+            return res.json({ 
+                patientdata, 
+                appointments
+            });
+        }
+
+        // Render the view with a flag if no appointments exist
+        res.render("patient_view_appointment_page.ejs", {
+            patientdata,
+            appointments, // Pass array directly
+            noAppointments: appointments.length === 0 // Flag for no appointments
+        });
+
+    } catch (err) {
+        console.error("Error in patient view appointment page", err);
+        res.status(500).json({ error: "Server error" });
     }
 });
-//in patients page add another option to view all medical records
-app.post("/patients/medical/records",async (req,res)=>{
-    const{patientdata}=req.body;
-    try{
-        let patientmedicalrecordresult;
-        //left join so that null dcotor name will also come as doctor might be deleted but patient medical record won't
-        patientmedicalrecordresult=await pool.query("SELECT m.visit_date, m.diagnosis, m.prescription,d.name AS doctor_name, d.specialization FROM medicalrecords m LEFT JOIN doctor d ON m.doctor_id = d.doctor_id WHERE m.patient_id = $1 ORDER BY m.visit_date DESC",[patientdata.patient_id]);
-        if(patientmedicalrecordresult.rows.length>0)
-        res.render("patient_view_medical_record_page.ejs",{patientdata:patientdata,medicalrecords:patientmedicalrecordresult});
-    else
-        res.render("patient_dashboard.ejs",{patientdata:patientdata,norecords:"true"});
-    }
-    catch{
-        console.error("Error in patient view medical records page");
+
+
+// in patients page add another option to view all medical records
+app.post("/patients/medical/records", async (req, res) => {
+    try {
+        if (!req.body.patientdata) {
+            return res.status(400).send("Invalid patient data");
+        }
+        let patientdata;
+        
+        try {
+            patientdata = JSON.parse(req.body.patientdata);
+        } catch (error) {
+            return res.status(400).send("Invalid patient data format");
+        }
+
+        if (!patientdata || !patientdata.patient_id) {
+            return res.status(400).send("Patient ID is missing");
+        }
+
+        // Fetch medical records using patient.patient_id
+        const query = `SELECT mr.*, d.name AS doctor_name 
+    FROM medicalrecords mr 
+    LEFT JOIN doctor d ON mr.doctor_id = d.doctor_id 
+    WHERE mr.patient_id = $1 
+    ORDER BY mr.visit_date DESC;`;
+        const { rows: medicalRecords } = await pool.query(query, [patientdata.patient_id]);
+
+        res.render("patient_view_medical_record_page.ejs", {
+            patientdata,
+            medicalrecords: JSON.stringify(medicalRecords)
+        });
+    } catch (error) {
+        res.status(500).send("Server error");
     }
 });
-//go back to dashboard patient
-app.post("/patients/dashboard",async (req,res)=>{
-    const{patientdata}=req.body;
-    res.render("patient_dashboard.ejs",{patientdata:patientdata});
+
+
+
+
+
+
+// go back to dashboard patient
+app.post("/patients/dashboard", (req, res) => {
+    try {
+        let patientdata = req.body.patientdata || "{}";
+        patientdata = JSON.parse(patientdata); // Always decode
+        res.render("patient_dashboard", { patientdata });
+    } catch (error) {
+        console.error("Error loading patient dashboard:", error);
+        res.status(400).send("Invalid data format");
+    }
 });
+
+
+
 //doctor dashboard view appointments button
 app.post("/doctor/dashboard/appoinments",async (req,res)=>{
     const{doctordata}=req.body;
