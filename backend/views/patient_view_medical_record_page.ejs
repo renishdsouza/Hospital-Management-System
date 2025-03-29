@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>View Medical Records</title>
+    <style>
+        table {
+            width: 80%;
+            margin: auto;
+            border-collapse: collapse;
+            text-align: center;
+        }
+        th, td {
+            border: 1px solid black;
+            padding: 10px;
+        }
+        th {
+            background-color: lightgray;
+        }
+    </style>
+</head>
+<body>
+    <%- include("header_logout.ejs") %>
+
+    <div style="text-align: center;">
+        <form action="/patients/dashboard" method="post">
+            <button type="submit">Go Back</button>
+        </form>
+
+        <h2>Medical Records</h2>
+
+        <% if (medicalrecords.length > 0) { %>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Visit Date</th>
+                        <th>Doctor Name</th>
+                        <th>Specialization</th>
+                        <th>Diagnosis</th>
+                        <th>Prescription</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <% medicalrecords.forEach(record => { %>
+                        <tr>
+                            <td><%= record.visit_date.toISOString().split('T')[0] %></td>
+                            <td><%= record.doctor_name ? record.doctor_name : "N/A" %></td>
+                            <td><%= record.specialization ? record.specialization : "N/A" %></td>
+                            <td><%= record.diagnosis %></td>
+                            <td><%= record.prescription ? record.prescription : "N/A" %></td>
+                        </tr>
+                    <% }) %>
+                </tbody>
+            </table>
+        <% } else { %>
+            <p>No medical records found.</p>
+        <% } %>
+    </div>
+
+    <%- include("footer.ejs") %>
+</body>
+</html>
