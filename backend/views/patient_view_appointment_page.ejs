@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>View Appointment Page</title>
+    <title>View Appointments</title>
     <style>
         table {
             width: 80%;
@@ -22,41 +22,41 @@
 </head>
 <body>
     <%- include("header_logout.ejs") %>
-    
+
     <div style="text-align: center;">
+        <!-- Go Back Button -->
         <form action="/patients/dashboard" method="post">
+            <input type="hidden" name="patientdata" value='<%= JSON.stringify(patientdata) %>'>
             <button type="submit">Go Back</button>
         </form>
-        
-        <h2>Appointments</h2>
-        
-        <% if (appointmentsData.length > 0) { %>
+
+        <h2>Your Appointments</h2>
+
+        <% if (noAppointments) { %>
+            <p>No Appointments Found.</p>
+        <% } else { %>
             <table>
                 <thead>
                     <tr>
-                        <th>Appointment ID</th>
+                        <th>Appointment Date</th>
+                        <th>Time</th>
                         <th>Doctor Name</th>
                         <th>Specialization</th>
-                        <th>Date</th>
-                        <th>Time</th>
                         <th>Status</th>
                     </tr>
                 </thead>
                 <tbody>
-                    <% appointmentsData.forEach(appointment => { %>
+                    <% appointments.forEach(appointment => { %>
                         <tr>
-                            <td><%= appointment.appointment_id %></td>
-                            <td><%= appointment.doctor_name %></td>
-                            <td><%= appointment.specialization %></td>
-                            <td><%= appointment.date.toDateString() %></td>
-                            <td><%= appointment.time %></td>
-                            <td><%= appointment.status %></td>
+                            <td><%= appointment.date ? new Date(appointment.date).toISOString().split('T')[0] : "N/A" %></td>
+                            <td><%= appointment.time ? appointment.time : "N/A" %></td>
+                            <td><%= appointment.doctor_name ? appointment.doctor_name : "N/A" %></td>
+                            <td><%= appointment.specialization ? appointment.specialization : "N/A" %></td>
+                            <td><%= appointment.status ? appointment.status : "N/A" %></td>
                         </tr>
                     <% }) %>
                 </tbody>
             </table>
-        <% } else { %>
-            <p>No appointments found.</p>
         <% } %>
     </div>
 

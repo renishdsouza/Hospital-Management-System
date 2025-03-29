@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>View Medical Records</title>
+    <title>Medical Records | Hospital Management System</title>
     <style>
         table {
             width: 80%;
@@ -18,43 +18,50 @@
         th {
             background-color: lightgray;
         }
+        .no-records {
+            text-align: center;
+            color: red;
+            font-weight: bold;
+        }
     </style>
 </head>
 <body>
     <%- include("header_logout.ejs") %>
 
     <div style="text-align: center;">
+        <!-- Go Back Button -->
         <form action="/patients/dashboard" method="post">
+            <input type="hidden" name="patientdata" value='<%= JSON.stringify(patientdata) %>'>
             <button type="submit">Go Back</button>
         </form>
 
         <h2>Medical Records</h2>
+        
+        <% let medicalRecords = []; try { medicalRecords = JSON.parse(medicalrecords) || []; } catch (e) { console.error("Error parsing medical records:", e); } %>
 
-        <% if (medicalrecords.length > 0) { %>
+        <% if (medicalRecords.length > 0) { %>
             <table>
                 <thead>
                     <tr>
-                        <th>Visit Date</th>
-                        <th>Doctor Name</th>
-                        <th>Specialization</th>
+                        <th>Date</th>
+                        <th>Doctor</th>
                         <th>Diagnosis</th>
                         <th>Prescription</th>
                     </tr>
                 </thead>
                 <tbody>
-                    <% medicalrecords.forEach(record => { %>
+                    <% medicalRecords.forEach(record => { %>
                         <tr>
-                            <td><%= record.visit_date.toISOString().split('T')[0] %></td>
+                            <td><%= record.visit_date ? new Date(record.visit_date).toISOString().split('T')[0] : "N/A" %></td>
                             <td><%= record.doctor_name ? record.doctor_name : "N/A" %></td>
-                            <td><%= record.specialization ? record.specialization : "N/A" %></td>
-                            <td><%= record.diagnosis %></td>
+                            <td><%= record.diagnosis ? record.diagnosis : "N/A" %></td>
                             <td><%= record.prescription ? record.prescription : "N/A" %></td>
                         </tr>
                     <% }) %>
                 </tbody>
             </table>
         <% } else { %>
-            <p>No medical records found.</p>
+            <p class="no-records">No Medical Records Available</p>
         <% } %>
     </div>
 

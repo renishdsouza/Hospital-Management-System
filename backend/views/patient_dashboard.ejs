@@ -4,52 +4,21 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Patient Dashboard | Hospital Management System</title>
-    <script>
-        // Hide "No Appointments Available" after 5 seconds
-        setTimeout(() => {
-            const noAppointmentsMessage = document.getElementById("no-appointments");
-            if (noAppointmentsMessage) {
-                noAppointmentsMessage.style.display = "none"; // Hide the element
-            }
-        }, 1500);
-
-        // Hide "No Medical Records Available" after 5 seconds
-        setTimeout(() => {
-            const noMedicalRecordsMessage = document.getElementById("no-medical-records");
-            if (noMedicalRecordsMessage) {
-                noMedicalRecordsMessage.style.display = "none"; // Hide the element
-            }
-        }, 1500);
-    </script>
 </head>
 <body>
     <%- include("header_logout.ejs") %>
     <div class="container">
         <h1 class="header">HMS</h1>
         <div class="content">
-            <% if(locals.patientdata) { %>
-                <h2>Welcome, <%= patientdata.name %></h2>
-            <% } %>
+            <h2>Welcome, <%= patientdata.name ? patientdata.name : "Patient" %></h2>
 
-            <% if(locals.noappointments) { %>
-                <% if(noappointments == "true") { %>
-                    <h3 id="no-appointments">No Appointments Available</h3>
-                <% } %>
-            <% } %>
-
-            <% if(locals.nomedicalrecords) { %>
-                <% if(nomedicalrecords == "true") { %>
-                    <h3 id="no-medical-records">No Medical Records Available</h3>
-                <% } %>
-            <% } %>
-
-            <form action="/patient/appoinment" method="post">
-                <input type="hidden" name="patientdata" value="<%= patientdata %>">
+            <form action="/patient/appointment" method="post">
+                <input type="hidden" name="patientdata" value="<%= JSON.stringify(patientdata) %>">
                 <button type="submit">View Appointments</button>
             </form>
 
             <form action="/patients/medical/records" method="post">
-                <input type="hidden" name="patientdata" value="<%= patientdata %>">
+                <input type="hidden" name="patientdata" value="<%= JSON.stringify(patientdata) %>">
                 <button type="submit">View Medical Records</button>
             </form>
         </div>
