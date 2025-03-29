@@ -101,165 +101,254 @@ app.post("/login/submit", async (req, res) => {
 
 
 //reception new patient register button action
+// Reception New Patient Register Button Action
 app.post("/reception/newpatienregister", async (req, res) => {
-    let {receptionnistdata}=req.body;
-    res.render("new_patient_register.ejs", { receptionnistdata:receptionnistdata });
+    let receptionistdata = req.body.receptionistdata;
+
+    try {
+        // Parse receptionistdata if it's a JSON string
+        receptionistdata = typeof receptionistdata === "string" ? JSON.parse(receptionistdata) : receptionistdata;
+    } catch (error) {
+        console.error("Error parsing receptionistdata:", error);
+        receptionistdata = {}; // Default to an empty object if parsing fails
+    }
+
+    res.render("new_patient_register.ejs", { receptionistdata });
 });
 
-//new patient registeration page action
+// New Patient Registration Page Action
+// New Patient Registration Page Action
 app.post("/new/patient/register/submit", async (req, res) => {
-    const { receptionnistdata, username, password, name, dob, gender, phone, email, address, bloodgroup, medical_history } = req.body;
-    //here we can do this without reconnecting but we have to create a new connection if we want it to be like a transaction
-    //begin indicates start of transaction and if there is any issue in the transaction then we will use roll
-    //back to cancel the transaction and not make any changes
+    let { receptionistdata, username, password, name, dob, gender, phone, email, address, bloodgroup, medical_history } = req.body;
+
+    try {
+        // Parse receptionistdata if it's a JSON string
+        receptionistdata = typeof receptionistdata === "string" ? JSON.parse(receptionistdata) : receptionistdata;
+    } catch (error) {
+        console.error("Error parsing receptionistdata:", error);
+        return res.render("reception_dashboard.ejs", { receptionistdata: {}, newpatientregisterstatus: "false" });
+    }
+
     const client = await pool.connect();
     try {
         await client.query("BEGIN");
-        //user table insert first
-        const userInsertQuery = 'INSERT INTO "user" (username, password, role) VALUES ($1, $2, $3) RETURNING user_id';
+
+        // Insert into user table first
+        const userInsertQuery =
+            'INSERT INTO "user" (username, password, role) VALUES ($1, $2, $3) RETURNING user_id';
         const userResult = await client.query(userInsertQuery, [username, password, "patient"]);
         const userId = userResult.rows[0].user_id;
 
-        //patient table insert
-        const patientInsertQuery = 'INSERT INTO "patient" (user_id, name, dob, gender, phone, email, address, bloodgroup, medical_history) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9)';
-        await client.query(patientInsertQuery, [userId, name, dob, gender, phone, email, address, bloodgroup, medical_history]);
+        // Insert into patient table
+        const patientInsertQuery =
+            'INSERT INTO "patient" (user_id, name, dob, gender, phone, email, address, blood_group, medical_history) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)';
+        await client.query(patientInsertQuery, [
+            userId,
+            name,
+            dob,
+            gender,
+            phone,
+            email,
+            address,
+            bloodgroup || null,
+            medical_history || null,
+        ]);
 
         await client.query("COMMIT");
-        //if it is true then add to ejs file something to show a message like patiend added successfully for some second or display an alert if true
-        //if the value is false then display a message like patient registration failed
-        res.render("reception_dashboard.ejs", { receptionnistdata: receptionnistdata, newpatientregisterstatus: "true" });
 
+        res.render("reception_dashboard.ejs", { receptionistdata: receptionistdata || {}, newpatientregisterstatus: "true" });
     } catch (error) {
         await client.query("ROLLBACK");
         console.error("Transaction failed:", error);
-        res.render("reception_dashboard.ejs", { receptionnistdata: receptionnistdata, newpatientregisterstatus: "false" });
+        res.render("reception_dashboard.ejs", { receptionistdata: receptionistdata || {}, newpatientregisterstatus: "false" });
     } finally {
         client.release();
     }
 });
+
 //first appionments stage 1 page
-app.post("/appoinment/reception/schedule",(req,res)=>{
-    const {receptiondata}=req.body;
-    res.render("first_appoinment_stage_1.ejs",{receptiondata:reception});
-})
-//appoinment schedule receptionnist stage1
-app.post("/new/appoinment/schedule/reception/stage1",async(req,res)=>{
-    const{receptionnistdata,dob,username}=req.body;
-    
-    try{
-        let patientquerresult;
-        let userid,resultuser;
-        //get the userid with the given username
-        resultuser=await pool.query('SELECT * FROM "user" WHERE username=$1',[username]);
-        userid=resultuser.rows[0].user_id;
-        patientquerresult=await pool.query("SELECT * FROM patient WHERE user_id=$1  AND dob=$2",
-            [userid,dob]);
-            if(patientquerresult.rows.length>0){
-                res.render("appoinment_scheduler_page_stage2.ejs",{receptiondata:receptionnistdata,
-                    patientdetails:patientquerresult.rows[0]});
-                    } else{
-                        res.render("reception_dashboard.ejs",{receptionnistdata:receptionnistdata,patientfound:"false"});
-                    }
+app.post("/appoinment/reception/schedule", (req, res) => {
+    let receptionistdata = req.body.receptionistdata;
+
+    // Parse receptionistdata if it's a JSON string
+    try {
+        receptionistdata = JSON.parse(receptionistdata);
+    } catch (error) {
+        console.error("Error parsing receptionistdata:", error);
     }
-    catch{
-        console.error("Error in appoinment scheduler patient search");
-        }        
-                                
+
+    res.render("first_appointment_stage_1.ejs", { receptionistdata });
 });
 
-// appoinment schedule,stage 2 to stage 3 send logic now below is  stage 2 we have to confirm the patient details
-app.post("/new/appoinment/schedule/reception/stage2/confirm", async (req, res)=>{
-    const {patientdetails,receptionnistdata}=req.body;
-    try{
-        let doctorspecialization;
-        doctorspecialization=await pool.query("SELECT DISTINCT specialization FROM doctor");
-    res.render("appoinment_scheduler_page_stage3.ejs",{patientdata:patientdetails,receptionnistdata:receptionnistdata,specialization:doctorspecialization.rows});
-    } catch(error){
-        console.log("unable to get doctor specialization");
+//appoinment schedule receptionnist stage1
+app.post("/new/appoinment/schedule/reception/stage1", async (req, res) => {
+    let { receptionistdata, dob, username } = req.body;
+
+    // Parse receptionistdata if it's a JSON string
+    try {
+        receptionistdata = JSON.parse(receptionistdata);
+    } catch (error) {
+        console.error("Error parsing receptionistdata:", error);
+    }
+
+    try {
+        let resultuser = await pool.query('SELECT * FROM "user" WHERE username=$1', [username]);
+        if (resultuser.rows.length > 0) {
+            const userid = resultuser.rows[0].user_id;
+            const patientquerresult = await pool.query("SELECT * FROM patient WHERE user_id=$1 AND dob=$2", [userid, dob]);
+
+            if (patientquerresult.rows.length > 0) {
+                res.render("appointment_scheduler_page_stage2.ejs", { receptionistdata, patientdetails: patientquerresult.rows[0] });
+            } else {
+                res.render("reception_dashboard.ejs", { receptionistdata, patientfound: "false" });
+            }
+        } else {
+            res.render("reception_dashboard.ejs", { receptionistdata, patientfound: "false" });
+        }
+    } catch (error) {
+        console.error("Error in appointment scheduler patient search:", error);
     }
 });
+
+
+// appoinment schedule,stage 2 to stage 3 send logic now below is  stage 2 we have to confirm the patient details
+app.post("/new/appoinment/schedule/reception/stage2/confirm", async (req, res) => {
+    let { patientdetails, receptionistdata } = req.body;
+
+    // Parse receptionistdata if it's a JSON string
+    try {
+        receptionistdata = JSON.parse(receptionistdata);
+    } catch (error) {
+        console.error("Error parsing receptionistdata:", error);
+    }
+
+    try {
+        const { rows: doctorspecialization } = await pool.query("SELECT DISTINCT specialization FROM doctor");
+        res.render("appoinment_scheduler_page_stage3.ejs", {
+            patientdata: patientdetails,
+            receptionistdata,
+            specialization: JSON.stringify(doctorspecialization),
+        });
+    } catch (error) {
+        console.error("Unable to get doctor specialization:", error);
+    }
+});
+
 
 //appoinment schedule stage 3 here patien will have to choose a specialization this needs to be a 
 //separate form in html where upon selecting a option i will get a method=post and action as
 // the path specified down /new/appoinmets/....
-app.post("/new/appoinment/schedule/reception/stage3/specialization", async (req, res)=>{
-    //ignore the coments below inside this
-    //now here upon choosing a specialist all the doctor names must be given under select option 
-    //ask rithvik how this will be implemtned in frontend
-    //now before deciding anything in the temp database only timing is available maybe under assumtion that
-    //he is available every day also if we want him to be available everyday then maybe keep a limit 
-    //for the number of appoinments he can take in a day and if the count of existing appoinments with that
-    //doctor is already equal to the limit then show to choose another date
-    //now option 2 is no such thing as limit and in terms of availability have days and when the user
-    //gives a date as input we will check what day it is and if the doctor is available or not
-    //if available we will allow for the appoinment to be scheduled otherise we have to give some 
-    //error message in frontend and also we might have to maintain a limit of appoinments for each day
-    //my choice is to go with the first approach with doctor available on all days
-//so here after choosing the specialization we will renser the doctor names available
-const{patiendata,receptionnistdata,specialization}=req.body;
-try{
-    let doctorqueryresult;
-    doctorqueryresult=await pool.query("SELECT * FROM doctor WHERE specialization=$1",[specialization]);
-    if(doctorqueryresult.rows.length>0){
-        res.render("appoinment_scheduler_page_stage3.ejs",{patientdata:patiendata,receptionnistdata:receptionnistdata,doctors:doctorqueryresult.rows});
-    }else{
-        console.log("doctor specialization error");
+app.post("/new/appoinment/schedule/reception/stage3/specialization", async (req, res) => {
+    let { patiendata, receptionnistdata, specialization } = req.body;
+
+    // Parse receptionnistdata if it's a JSON string
+    try {
+        receptionnistdata = JSON.parse(receptionnistdata);
+    } catch (error) {
+        console.error("Error parsing receptionnistdata:", error);
     }
 
-}
-catch{
-    console.error("Error in appoinment scheduler stage 3");
+    try {
+        const { rows: doctorqueryresult } = await pool.query("SELECT * FROM doctor WHERE specialization=$1", [specialization]);
 
-}
-
-
+        if (doctorqueryresult.length > 0) {
+            res.render("appoinment_scheduler_page_stage3.ejs", {
+                patiendata,
+                receptionnistdata,
+                doctors: JSON.stringify(doctorqueryresult),
+            });
+        } else {
+            console.log("Doctor specialization error");
+        }
+    } catch (error) {
+        console.error("Error in appointment scheduler stage 3:", error);
+    }
 });
+
 //but we need to ensure doctor names are unique at present within the same specialization
 //after choosing doctor date and time the second will have this within the same page
-app.post("/add/appoinment",async (req,res)=>{
-    const{patiendata,receptionnistdata,selected_doctor_name,specialization,date,time}=req.body;
-    let doctorqueryresult;
-    try{
-        doctorqueryresult=await pool.query("SELECT * FROM doctor WHERE specialization=$1 AND name=$2",[specialization,selected_doctor_name]);
-        if(doctorqueryresult.rows.length>0){
-            const doctorid=doctorqueryresult.rows[0].doctor_id;
-            const client=await pool.connect();
-            try{
+app.post("/add/appoinment", async (req, res) => {
+    let { patiendata, receptionistdata, selected_doctor_name, specialization, date, time } = req.body;
+
+    // Parse receptionistdata if it's a JSON string
+    try {
+        receptionistdata = JSON.parse(receptionistdata);
+    } catch (error) {
+        console.error("Error parsing receptionistdata:", error);
+    }
+
+    try {
+        const doctorqueryresult = await pool.query(
+            "SELECT * FROM doctor WHERE specialization=$1 AND name=$2",
+            [specialization, selected_doctor_name]
+        );
+
+        if (doctorqueryresult.rows.length > 0) {
+            const doctorid = doctorqueryresult.rows[0].doctor_id;
+            const client = await pool.connect();
+
+            try {
                 await client.query("BEGIN");
-                const appionmentinsertquery="INSERT INTO appointment (doctor_id,patient_id,date,time) VALUES ($1,$2,$3,$4)";
-                const appionmentinsertresult=await client.query(appionmentinsertquery,[doctorid,patiendata.id,date,time]);
+                const appionmentinsertquery =
+                    "INSERT INTO appointment (doctor_id,patient_id,date,time) VALUES ($1,$2,$3,$4)";
+                await client.query(appionmentinsertquery, [doctorid, patiendata.id, date, time]);
                 await client.query("COMMIT");
-                res.redirect("/new/appoinment/schedule/reception/stage4",{receptiondata:receptionnistdata});
-            }
-            catch (error) {
+
+                res.redirect("/new/appoinment/schedule/reception/stage4");
+            } catch (error) {
                 await client.query("ROLLBACK");
                 console.error("Transaction failed:", error);
-                res.redirect("/new/appointment/reception/failed",{receptionnistdata:receptionnistdata});
+                res.redirect("/new/appointment/reception/failed");
             } finally {
                 client.release();
             }
-
         }
+    } catch (error) {
+        console.error("Error in appointment scheduler:", error);
     }
-    catch (error){
-        console.error("Error in appoinment scheduler");
+});
+//appointment success
+app.post("/new/appoinment/schedule/reception/stage4", async (req, res) => {
+    let { receptionistdata } = req.body;
+
+    // Parse receptionistdata if it's a JSON string
+    try {
+        receptionistdata = JSON.parse(receptionistdata);
+    } catch (error) {
+        console.error("Error parsing receptionistdata:", error);
     }
+
+    res.render("success_appointment_schedule_reception.ejs", { receptionistdata });
 });
-//succesful appoinmet scheduled message and go back to dashboard button
-app.post("/new/appoinment/schedule/reception/stage4",async(req,res)=>{
-    const{receptiondata}=req.body;
-    res.render("success_appointment_schedule_reception.ejs",{receptiondata:receptiondata});
+//appointment failed
+app.post("/new/appointment/reception/failed", async (req, res) => {
+    let { receptionistdata } = req.body;
+
+    // Parse receptionistdata if it's a JSON string
+    try {
+        receptionistdata = JSON.parse(receptionistdata);
+    } catch (error) {
+        console.error("Error parsing receptionistdata:", error);
+    }
+
+    res.render("failed_appointment_schedule_reception.ejs", { receptionistdata });
 });
-//failed appoinmet schedule and also give the button to go back to dashboard
-app.post("/new/appointment/reception/failed",async(req,res)=>{
-    const{receptionnistdata}=req.body;
-    res.render("failed_appointment_schedule_reception.ejs",{receptionnistdata:reception});
-});
-//go back to dashboard reception button in the above 2 ejs file
+
+// Receptionist Dashboard
 app.post("/reception/dashboard", async (req, res) => {
-    const{receptionnistdata}=req.body;
-    res.render("reception_dashboard.ejs",{receptionnistdata:receptionnistdata});
+    let receptionistdata = req.body.receptionistdata;
+
+    try {
+        // Parse receptionistdata if it's a JSON string
+        receptionistdata = typeof receptionistdata === "string" ? JSON.parse(receptionistdata) : receptionistdata;
+    } catch (error) {
+        console.error("Error parsing receptionistdata:", error);
+        receptionistdata = {}; // Default to an empty object if parsing fails
+    }
+
+    res.render("reception_dashboard.ejs", { receptionistdata });
 });
+
 
 // in patients page view appointments
 app.post("/patient/appointment", async (req, res) => {
