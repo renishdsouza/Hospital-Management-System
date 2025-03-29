@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Appointment Scheduling - Stage 1</title>
+</head>
+<body>
+    <h2>Search Patient</h2>
+    <form action="/new/appoinment/schedule/reception/stage1" method="post">
+        <input type="hidden" name="receptionistdata" value='<%= JSON.stringify(receptionistdata || {}) %>'>
+        
+        <label for="username">Patient Username:</label>
+        <input type="text" id="username" name="username" required>
+        
+        <label for="dob">Date of Birth:</label>
+        <input type="date" id="dob" name="dob" required>
+        
+        <button type="submit">Search Patient</button>
+    </form>
+    
+</body>
+</html>

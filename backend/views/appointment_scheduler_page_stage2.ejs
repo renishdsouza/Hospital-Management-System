@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Appointment Scheduling - Stage 2</title>
+</head>
+<body>
+    <form action="/new/appointment/schedule/reception/stage2/confirm" method="post">
+        <input type="hidden" name="patientdetails" value='<%= JSON.stringify(patientdetails || {}) %>'>
+        <input type="hidden" name="receptionistdata" value='<%= JSON.stringify(receptionistdata || {}) %>'>
+    
+        <h3>Patient Details</h3>
+        <p>Name: <%= patientdetails.name %></p>
+        <p>Age: <%= patientdetails.age %></p>
+    
+        <button type="submit">Confirm Patient Details</button>
+    </form>
+    
+    
+</body>
+</html>

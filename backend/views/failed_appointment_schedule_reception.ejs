@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Appointment Scheduling Failed</title>
+</head>
+<body>
+    <%- include("header_logout.ejs") %>
+    <!-- Error Message -->
+    <h2>Appointment Scheduling Failed!</h2>
+    <p>Receptionist: <%= typeof receptionistdata !== 'undefined' && receptionistdata.name ? receptionistdata.name : 'Unknown Receptionist' %></p>
+    
+    <form action="/reception/dashboard" method="get">
+        <input type="hidden" name="receptionistdata" value='<%= JSON.stringify(receptionistdata || {}) %>'>
+        <button type="submit">Go Back to Dashboard</button>
+    </form>
+    
+    
+    
+
+</body>
+</html>

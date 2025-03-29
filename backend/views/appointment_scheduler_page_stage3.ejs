@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Appointment Scheduling - Stage 3</title>
+    <script>
+        // JavaScript to handle automatic form submission on dropdown change
+        function submitSpecializationForm() {
+            const form = document.getElementById("specialization-form");
+            form.submit(); // Automatically submit the form
+        }
+    </script>
+</head>
+<body>
+    <!-- Specialization Selection -->
+    <h2>Select Specialization</h2>
+    <form id="specialization-form" action="/new/appointment/schedule/reception/stage3/specialization" method="post">
+        <!-- Ensure patientdata and receptionistdata are always passed -->
+        <input type="hidden" name="patientdata" value='<%= JSON.stringify(patientdata || {}) %>'>
+        <input type="hidden" name="receptionistdata" value='<%= JSON.stringify(receptionistdata || {}) %>'>
+        
+        <label for="specialization">Specialization:</label>
+        <select id="chosen_specialization" name="chosen_specialization" required onchange="submitSpecializationForm()">
+            <option value="">--select--</option>
+            <% if (Array.isArray(specialization) && specialization.length > 0) { %>
+                <% specialization.forEach(spec => { %>
+                    <option value="<%= spec.specialization %>"><%= spec.specialization %></option>
+                <% }); %>
+            <% } else { %>
+                <option value="none">No specializations available</option>
+            <% } %>
+        </select>
+    </form>
+    
+    <!-- Doctor Selection -->
+    <% if (doctors && Array.isArray(doctors) && doctors.length > 0) { %>
+        <h2>Select Doctor and Appointment Details</h2>
+        <form action="/add/appointment" method="post">
+            <input type="hidden" name="patientdata" value='<%= JSON.stringify(patientdata || {}) %>'>
+            <input type="hidden" name="receptionistdata" value='<%= JSON.stringify(receptionistdata || {}) %>'>
+            <input type="hidden" name="chosen_specialization" value="<%= chosen_specialization %>">
+        
+            <!-- Doctor Dropdown -->
+            <label for="doctor">Doctor:</label>
+            <select id="doctor" name="selected_doctor_name" required>
+                <option value="">--Select Doctor--</option>
+                <% doctors.forEach(doctor => { %>
+                    <option value="<%= doctor.name %>"><%= doctor.name %></option>
+                <% }); %>
+            </select>
+        
+            <!-- Date and Time Inputs -->
+            <label for="date">Date:</label>
+            <input type="date" id="date" name="date" required>
+        
+            <label for="time">Time:</label>
+            <input type="time" id="time" name="time" required>
+        
+            <!-- Submit Button -->
+            <button type="submit">Schedule Appointment</button>
+        </form>
+        
+        
+    <% } else { %>
+        <!-- Error Message if No Doctors Found -->
+        <p>No doctors available under this specialization.</p>
+    <% } %>
+    
+</body>
+</html>
