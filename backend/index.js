@@ -569,7 +569,347 @@ app.post("/admin/remove/user/username",async (req,res)=>{
         client.release();
     }
 });
-//update queries
+//update queries update button functionality
+app.post("/admin/update",async (req,res)=>{
+    const{admindata}=req.body;
+    res.render("admin_update.ejs",{admindata:admindata});
+});
+//check for checkbox input prompt handling from frontend and backend you have given in chatgpt
+//update stage 1: input username and role
+app.post("/admin/update/stage1",async (req,res)=>{
+    const{admindata,username,role}=req.body;
+    try{
+        let result;
+        result=await pool.query('SELECT * FROM "user" WHERE username=$1 AND role=$2',[username,role]);
+        if(result.rows.length>0){
+            if(role=="patient")
+                res.render("patient_update_page_stage2.ejs",{admindata:admindata,userid:result.rows[0].user_id});
+            else
+                if(role=="doctor")
+                    res.render("doctor_update_page_stage2.ejs",{admindata:admindata,userid:result.rows[0].user_id});
+                else
+                    if(role=="receptionist")
+                        res.render("recetpionist_update_page_stage2.ejs",{admindata:admindata,userid:result.rows[0].user_id});
+                                }
+            else                    
+            res.render("admin_update.ejs",{admindata:admindata,invalidcred:"false"});                    
+    }
+    catch(error){
+        console.log("unable to search for username while admin update");
+                }
+
+});
+//update stage 2: input new details for patient
+app.post("/admin/update/stage2/patient",async (req,res)=>{
+    //update fields will contain all the checkbox field chosen or ticked
+    const { admindata, userid, updatefield } = req.body;
+
+if (!updatefield) {
+    res.render("patient_update_page_stage2.ejs", {
+        admindata: admindata,
+        userid: userid,
+        nofieldchosend: "false"
+    });
+} else {
+    // Ensure updatefield is always an array
+    const fieldsToUpdate = Array.isArray(updatefield) ? updatefield : [updatefield];
+
+    // Object to store which fields need updating
+    let updateFlags = {
+        nameupdate: "false",
+        dobupdate: "false",
+        genderupdate: "false",
+        phoneupdate: "false",
+        emailupdate: "false",
+        addressupdate: "false",
+        bloodgroupupdate: "false",
+        medicalhistoryupdate: "false",
+        passwordupdate: "false"
+    };
+
+    // Mark selected fields as "true"
+    fieldsToUpdate.forEach(field => {
+        switch (field) {
+            case "name":
+                updateFlags.nameupdate = "true";
+                break;
+            case "dob":
+                updateFlags.dobupdate = "true";
+                break;
+            case "gender":
+                updateFlags.genderupdate = "true";
+                break;
+            case "phone":
+                updateFlags.phoneupdate = "true";
+                break;
+            case "email":
+                updateFlags.emailupdate = "true";
+                break;
+            case "address":
+                updateFlags.addressupdate = "true";
+                break;
+            case "blood_group":
+                updateFlags.bloodgroupupdate = "true";
+                break;
+            case "medical_history":
+                updateFlags.medicalhistoryupdate = "true";
+                break;
+            case "password":
+                updateFlags.passwordupdate = "true";
+                break;
+        }
+    });
+    //remember the chosen fields must be set as required use an if else construct
+    // Render update page with selected fields
+    res.render("patient_update_stage3.ejs", {
+        admindata: admindata,
+        userid: userid,
+        chosenfields:updateFlags  // Spread all update flags into the template
+    });
+}
+
+});
+//stage 3 for patient here we will receive new data and update all the fields
+    app.post("/admin/update/stage3/patient", async (req, res) => {
+        const { admindata, userid, chosenfields } = req.body;
+    
+        let client;
+        try {
+            client = await pool.connect();
+            await client.query("BEGIN");
+    
+            let updateQuery = "UPDATE patient SET ";
+            let updateValues = [];
+            let index = 1;
+    
+            // Convert chosenfields object back into an array of selected fields
+            let fieldsToUpdate = Object.keys(chosenfields).filter(field => chosenfields[field] === "true");
+    
+            fieldsToUpdate.forEach(field => {
+                if (field !== "password" && req.body[field]) {  // Exclude password update in patient table
+                    updateQuery += `${field} = $${index}, `;
+                    updateValues.push(req.body[field]);
+                    index++;
+                }
+            });
+    
+            if (updateValues.length > 0) {  // Only execute if there are valid updates
+                updateQuery = updateQuery.slice(0, -2) + ` WHERE user_id = $${index}`;
+                updateValues.push(userid);
+                await client.query(updateQuery, updateValues);
+            }
+    
+            // Handle password separately if included (No hashing)
+            if (fieldsToUpdate.includes("password") && req.body.password) {
+                await client.query("UPDATE \"user\" SET password = $1 WHERE user_id = $2", [req.body.password, userid]);
+            }
+    
+            await client.query("COMMIT");
+            //also add go back to admin dashboard button
+            res.render("successfully_updated.ejs", { admindata: admindata });
+    
+        } catch (error) {
+            console.error("Error updating patient:", error);
+            await client.query("ROLLBACK");
+             //also add go back to admin dashboard button
+            res.render("update_failed.ejs", { admindata: admindata });
+        } finally {
+            if (client) client.release();
+        }
+    });
+
+// Update stage 2: Select fields to update for Receptionist
+app.post("/admin/update/stage2/receptionist", async (req, res) => {
+    const { admindata, userid, updatefield } = req.body;
+
+    if (!updatefield) {
+        return res.render("receptionist_update_page_stage2.ejs", {
+            admindata: admindata,
+            userid: userid,
+            nofieldchosend: "false"
+        });
+    }
+
+    // Ensure updatefield is an array
+    const fieldsToUpdate = Array.isArray(updatefield) ? updatefield : [updatefield];
+
+    let updateFlags = {
+        nameupdate: "false",
+        emailupdate: "false",
+        phoneupdate: "false",
+        passwordupdate: "false"
+    };
+
+    fieldsToUpdate.forEach(field => {
+        switch (field) {
+            case "name":
+                updateFlags.nameupdate = "true";
+                break;
+            case "email":
+                updateFlags.emailupdate = "true";
+                break;
+            case "phone":
+                updateFlags.phoneupdate = "true";
+                break;
+            case "password":
+                updateFlags.passwordupdate = "true";
+                break;
+        }
+    });
+
+    // Render Stage 3 with chosen fields
+    res.render("receptionist_update_stage3.ejs", {
+        admindata: admindata,
+        userid: userid,
+        chosenfields: updateFlags
+    });
+});
+
+// Stage 3 for Receptionist - Receive new data and update in DB
+app.post("/admin/update/stage3/receptionist", async (req, res) => {
+    const { admindata, userid, chosenfields } = req.body;
+
+    let client;
+    try {
+        client = await pool.connect();
+        await client.query("BEGIN");
+
+        let updateQuery = 'UPDATE receptionist SET ';
+        let updateValues = [];
+        let index = 1;
+
+        let fieldsToUpdate = Object.keys(chosenfields).filter(field => chosenfields[field] === "true");
+
+        fieldsToUpdate.forEach(field => {
+            if (field !== "password" && req.body[field]) {  // Exclude password update in receptionist table
+                updateQuery += `${field} = $${index}, `;
+                updateValues.push(req.body[field]);
+                index++;
+            }
+        });
+
+        if (updateValues.length > 0) { 
+            updateQuery = updateQuery.slice(0, -2) + ` WHERE user_id = $${index}`;
+            updateValues.push(userid);
+            await client.query(updateQuery, updateValues);
+        }
+
+        // Handle password separately if selected (No hashing)
+        if (fieldsToUpdate.includes("password") && req.body.password) {
+            await client.query('UPDATE "user" SET password = $1 WHERE user_id = $2', [req.body.password, userid]);
+        }
+
+        await client.query("COMMIT");
+        res.render("successfully_updated.ejs", { admindata: admindata });
+
+    } catch (error) {
+        console.error("Error updating receptionist:", error);
+        await client.query("ROLLBACK");
+        res.render("update_failed.ejs", { admindata: admindata });
+    } finally {
+        if (client) client.release();
+    }
+});
+// Update stage 2: Select fields to update for Doctor
+app.post("/admin/update/stage2/doctor", async (req, res) => {
+    const { admindata, userid, updatefield } = req.body;
+
+    if (!updatefield) {
+        return res.render("doctor_update_page_stage2.ejs", {
+            admindata: admindata,
+            userid: userid,
+            nofieldchosend: "false"
+        });
+    }
+
+    // Ensure updatefield is an array
+    const fieldsToUpdate = Array.isArray(updatefield) ? updatefield : [updatefield];
+
+    let updateFlags = {
+        nameupdate: "false",
+        specializationupdate: "false",
+        phoneupdate: "false",
+        emailupdate: "false",
+        availabilityupdate: "false",
+        passwordupdate: "false"
+    };
+
+    fieldsToUpdate.forEach(field => {
+        switch (field) {
+            case "name":
+                updateFlags.nameupdate = "true";
+                break;
+            case "specialization":
+                updateFlags.specializationupdate = "true";
+                break;
+            case "phone":
+                updateFlags.phoneupdate = "true";
+                break;
+            case "email":
+                updateFlags.emailupdate = "true";
+                break;
+            case "availability":
+                updateFlags.availabilityupdate = "true";
+                break;
+            case "password":
+                updateFlags.passwordupdate = "true";
+                break;
+        }
+    });
+
+    // Render Stage 3 with chosen fields
+    res.render("doctor_update_stage3.ejs", {
+        admindata: admindata,
+        userid: userid,
+        chosenfields: updateFlags
+    });
+});
+// Stage 3 for Doctor - Receive new data and update in DB
+app.post("/admin/update/stage3/doctor", async (req, res) => {
+    const { admindata, userid, chosenfields } = req.body;
+
+    let client;
+    try {
+        client = await pool.connect();
+        await client.query("BEGIN");
+
+        let updateQuery = 'UPDATE doctor SET ';
+        let updateValues = [];
+        let index = 1;
+
+        let fieldsToUpdate = Object.keys(chosenfields).filter(field => chosenfields[field] === "true");
+
+        fieldsToUpdate.forEach(field => {
+            if (field !== "password" && req.body[field]) {  // Exclude password update in doctor table
+                updateQuery += `${field} = $${index}, `;
+                updateValues.push(req.body[field]);
+                index++;
+            }
+        });
+
+        if (updateValues.length > 0) { 
+            updateQuery = updateQuery.slice(0, -2) + ` WHERE user_id = $${index}`;
+            updateValues.push(userid);
+            await client.query(updateQuery, updateValues);
+        }
+
+        // Handle password separately if selected (No hashing)
+        if (fieldsToUpdate.includes("password") && req.body.password) {
+            await client.query('UPDATE "user" SET password = $1 WHERE user_id = $2', [req.body.password, userid]);
+        }
+
+        await client.query("COMMIT");
+        res.render("successfully_updated.ejs", { admindata: admindata });
+
+    } catch (error) {
+        console.error("Error updating doctor:", error);
+        await client.query("ROLLBACK");
+        res.render("update_failed.ejs", { admindata: admindata });
+    } finally {
+        if (client) client.release();
+    }
+});
+
 //admin go back to dashboard
 app.get("/admin/dashboard",async (req,res)=>{
     const{admindata}=req.body;
