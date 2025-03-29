@@ -14,6 +14,7 @@ const port = 3000;
 
 app.use(bodyParser.urlencoded({ extended: true }));
 app.set("view engine", "ejs");
+app.set("views", path.join(__dirname, "views"));
 
 const pool = new pg.Pool({
     user: process.env.DB_USER,
@@ -282,11 +283,11 @@ app.post("/patient/appoinment",async (req,res)=>{
     const{patientdata}=req.body;
     try{
         let patientappoinmentsresult;
-        patientappoinmentsresult=await pool.query("SELECT * FROM appointment WHERE patient_id = $1 ORDER BY date DESC",[patientdata.patient_id]);
+        patientappoinmentsresult=await pool.query("SELECT a.appointment_id, a.date, a.time, a.status,d.name AS doctor_name, d.specialization FROM appointment a JOIN doctor d ON a.doctor_id = d.doctor_id WHERE a.patient_id = $1 ORDER BY a.date DESC",[patientdata.patient_id]);
         if(patientappoinmentsresult.rows.length>0)
-        res.render("patient_view_appoinment_page.ejs",{patientdata:patientdata,appoimentsdata:patientappoinmentsresult,noappoinments:"false"});
+        res.render("patient_view_appoinment_page.ejs",{patientdata:patientdata,appoimentsdata:patientappoinmentsresult});
     else
-    res.render("patient_view_appoinment_page.ejs",{patientdata:patientdata,noappoinments:"true"});
+    res.render("patient_dashboard.ejs",{patientdata:patientdata,noappoinments:"true"});
     }
     catch{
         console.error("Error in patient view appoinment page");
