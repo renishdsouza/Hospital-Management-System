@@ -82,9 +82,7 @@ app.post("/login/submit", async (req, res) => {
         // ✅ Ensure correct variable names are passed based on role
         if (role === "patient") {
             return res.render(dashboardView, {
-                patientdata: roleData, 
-                noappointments: false, 
-                nomedicalrecords: false 
+                patientdata: roleData
             });
         } else if (role === "doctor") {
             return res.render(dashboardView, { doctordata: roleData });
