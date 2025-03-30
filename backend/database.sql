@@ -24,8 +24,8 @@ CREATE TABLE patient (
     name VARCHAR(100) NOT NULL,
     dob DATE NOT NULL,
     gender gender_type NOT NULL,
-    phone VARCHAR(15) UNIQUE NOT NULL,
-    email VARCHAR(100) UNIQUE NOT NULL,
+    phone VARCHAR(15)  NOT NULL,
+    email VARCHAR(100) NOT NULL,
     address TEXT NOT NULL,
     blood_group VARCHAR(5),
     medical_history TEXT,
@@ -38,8 +38,8 @@ CREATE TABLE doctor (
     user_id INT UNIQUE NOT NULL,
     name VARCHAR(100) NOT NULL, 
     specialization VARCHAR(100) NOT NULL,
-    phone VARCHAR(15) UNIQUE NOT NULL,
-    email VARCHAR(100) UNIQUE NOT NULL,
+    phone VARCHAR(15)  NOT NULL,
+    email VARCHAR(100)  NOT NULL,
     availability VARCHAR(50) NOT NULL,
     FOREIGN KEY (user_id) REFERENCES "user"(user_id) ON DELETE CASCADE
 );
@@ -49,8 +49,8 @@ CREATE TABLE receptionist (
     receptionist_id SERIAL PRIMARY KEY,
     user_id INT UNIQUE NOT NULL,
     name VARCHAR(100) NOT NULL,
-    email VARCHAR(100) UNIQUE NOT NULL,
-    phone VARCHAR(15) UNIQUE NOT NULL,
+    email VARCHAR(100)  NOT NULL,
+    phone VARCHAR(15)  NOT NULL,
     FOREIGN KEY (user_id) REFERENCES "user"(user_id) ON DELETE CASCADE
 );
 
@@ -59,8 +59,8 @@ CREATE TABLE admin (
     admin_id SERIAL PRIMARY KEY,
     user_id INT UNIQUE NOT NULL,
     name VARCHAR(100) NOT NULL,
-    email VARCHAR(100) UNIQUE NOT NULL,
-    phone VARCHAR(15) UNIQUE NOT NULL,
+    email VARCHAR(100)  NOT NULL,
+    phone VARCHAR(15)  NOT NULL,
     FOREIGN KEY (user_id) REFERENCES "user"(user_id) ON DELETE CASCADE
 );
 
