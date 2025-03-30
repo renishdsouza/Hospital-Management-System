@@ -1278,7 +1278,7 @@ app.post("/admin/viewusers", async (req, res) => {
 });
 
 app.post("/admin/viewusers/role", async (req, res) => {
-    const { admindata, role } = req.body;
+    let { admindata, role } = req.body;
     admindata = JSON.parse(admindata);
 
     try {
