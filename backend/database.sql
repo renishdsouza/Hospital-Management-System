@@ -129,7 +129,7 @@ INSERT INTO receptionist (user_id, name, email, phone) VALUES
 INSERT INTO "admin" (user_id, name, email, phone) VALUES
 (12, 'Alice admin', 'alice.admin@example.com', '9876543230');
 
--- Insert Appointments
+-- Insert Appointments  
 INSERT INTO appointment (patient_id, doctor_id, date, time)
 VALUES 
 (1, 1, '2025-03-31', '10:30:00'),
