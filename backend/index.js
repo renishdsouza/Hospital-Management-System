@@ -768,16 +768,18 @@ app.post("/doctor/dashboard", async (req, res) => {
 //admin add new user button functionality
 app.post("/admin/dashboard/users/add",async (req,res)=>{
     const{admindata}=req.body;
-    res.render("add_user_page.ejs",{admindata:admindata});
+    res.render("add_user_page.ejs",{admindata,useralreadypresent:"false"});
 });
-//admin add new user page here there will be next button upon clicking that request will come to below
+//admin add  new user page here there will be next button upon clicking that request will come to below
 app.post("/admin/add/new/user/stage1",async (req,res)=>{
     //username password and role 
-    const{admindata,username,password,role}=req.body;
+    let {admindata,username,password,role}=req.body;
+    admindata=JSON.parse(admindata);
     //here we are checking if the username is already taken
-   let usercheck= pool.query("SELECT * FROM user WHERE username = $1",[username]);
+   let usercheck= await pool.query('SELECT * FROM "user" WHERE username = $1',[username]);
+   console.log(usercheck);
    if(usercheck.rows.length>0)
-        res.render("add_user_page.ejs",{admindata:admindata, useralreadypresent:"true"});
+        res.render("add_user_page.ejs",{admindata, useralreadypresent:"true"});
     else{
     
         const client = await pool.connect();
@@ -789,11 +791,11 @@ app.post("/admin/add/new/user/stage1",async (req,res)=>{
         const userId = userResult.rows[0].user_id;
         await client.query("COMMIT");
         if(role=="patient")
-            res.render("add_patient_page.ejs",{admindata:admindata,userid:userId});
+            res.render("add_patient_page.ejs",{admindata,userid:userId});
         else if(role=="doctor")
-                res.render("add_doctor_page.ejs",{admindata:admindata,userid:userId});
+                res.render("add_doctor_page.ejs",{admindata,userid:userId});
             else
-            res.render("add_receptionist_page.ejs",{admindata:admindata,userid:userId});
+            res.render("add_receptionist_page.ejs",{admindata,userid:userId});
 
 
     } catch (error) {
@@ -808,22 +810,24 @@ app.post("/admin/add/new/user/stage1",async (req,res)=>{
 });
 //new patient add by admin
 app.post("/admin/add/new/patient/stage2",async (req,res)=>{
-    const{admindata,userid,name, dob, gender, phone, email, address, bloodgroup, medical_history}=req.body;
+    let {admindata,userid,name, dob, gender, phone, email, address, bloodgroup, medical_history}=req.body;
+    admindata=JSON.parse(admindata);
     const client = await pool.connect();
     try {
         await client.query("BEGIN");
-        const patientInsertQuery = 'INSERT INTO "patient" (user_id, name, dob, gender, phone, email, address, bloodgroup, medical_history) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9)';
-        await client.query(patientInsertQuery, [userId, name, dob, gender, phone, email, address, bloodgroup, medical_history]);
+        const patientInsertQuery = 'INSERT INTO "patient" (user_id, name, dob, gender, phone, email, address, blood_group, medical_history) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9)';
+        await client.query(patientInsertQuery, [userid, name, dob, gender, phone, email, address, bloodgroup, medical_history]);
         await client.query("COMMIT");
         //this page must contain a button to go back to dashboard
-        res.render("sucessfully_added_admin.ejs",{admindata:admindata});
+        res.render("successfully_added_admin.ejs",{admindata});
     } catch(error){
         console.log("unable to add into patient table by admin");
+        console.log(error);
         await client.query("ROLLBACK");
         //deleting user table entry also
-        await client.query('DELETE FROM "user" WHERE username = $1', [username]);
+        await client.query('DELETE FROM "user" WHERE user_id = $1', [userid]);
         //also add go back to dashboard button
-        res.render("failed_to_add_by_admin.ejs",{admindata:admindata});
+        res.render("failed_to_add_by_admin.ejs",{admindata});
     }finally{
         client.release();
     }
@@ -831,38 +835,41 @@ app.post("/admin/add/new/patient/stage2",async (req,res)=>{
 });
 //new doctor add by admin
 app.post("/admin/add/new/doctor/stage2",async (req,res)=>{
-    const{admindata,userid,name,specialization,phone,email,availability}=req.body;
+    let {admindata,userid,name,specialization,phone,email,availability}=req.body;
+    admindata=JSON.parse(admindata);
     const client = await pool.connect();
     try {
         await client.query("BEGIN");
-        const doctorInsertQuery = 'INSERT INTO "doctor" (user_id, name, phone, email,specialization,availability) VALUES ($1,$2,$3,$4,$5)';
+        const doctorInsertQuery = 'INSERT INTO "doctor" (user_id, name, phone, email,specialization,availability) VALUES ($1,$2,$3,$4,$5,$6)';
         await client.query(doctorInsertQuery, [userid, name,phone,email,specialization,availability]);
         await client.query("COMMIT");
-        res.render("sucessfully_added_admin.ejs",{admindata:admindata});
+        res.render("successfully_added_admin.ejs",{admindata});
     } catch(error){
+        console.log(error);
         console.log("unable to add into doctor table by admin");
         await client.query("ROLLBACK");
-        await client.query('DELETE FROM "user" WHERE username = $1', [username]);
-        res.render("failed_to_add_by_admin.ejs",{admindata:admindata});
+        await client.query('DELETE FROM "user" WHERE user_id = $1', [userid]);
+        res.render("failed_to_add_by_admin.ejs",{admindata});
     }finally{
         client.release();
     }
 });
 //new receptionist add by admin
 app.post("/admin/add/new/receptionist/stage2",async (req,res)=>{
-    const{admindata,userid,name,phone,email}=req.body;
+    let {admindata,userid,name,phone,email}=req.body;
+    admindata=JSON.parse(admindata);
     const client = await pool.connect();
     try {
         await client.query("BEGIN");
         const receptionInsertQuery = 'INSERT INTO "receptionist" (user_id, name, phone, email) VALUES ($1,$2,$3,$4)';
         await client.query(receptionInsertQuery, [userid, name,phone,email]);
         await client.query("COMMIT");
-        res.render("sucessfully_added_admin.ejs",{admindata:admindata});
+        res.render("successfully_added_admin.ejs",{admindata});
         }catch(error){
             console.log("unable to add into receptionist table by admin");
             await client.query("ROLLBACK");
-            await client.query('DELETE FROM "user" WHERE username = $1', [username]);
-            res.render("failed_to_add_by_admin.ejs",{admindata:admindata});
+            await client.query('DELETE FROM "user" WHERE user_id = $1', [userid]);
+            res.render("failed_to_add_by_admin.ejs",{admindata});
         }finally{
             client.release();
         }
@@ -871,11 +878,13 @@ app.post("/admin/add/new/receptionist/stage2",async (req,res)=>{
 //admin remove user button functionality
 app.post("/admin/remove/user",async (req,res)=>{
     const{admindata}=req.body;
-    res.render("admin_remove_user.ejs",{admindata:admindata});
+    res.render("admin_remove_user.ejs",{admindata});
 });
 //admin remove user functionality from form
 app.post("/admin/remove/user/username",async (req,res)=>{
-    const{admindata,username}=req.body;
+    let {admindata,username}=req.body;
+    admindata=JSON.parse(admindata);
+    const client = await pool.connect();
     try {
         await client.query("BEGIN");
         // Delete user (this will cascade delete related records)
@@ -883,13 +892,13 @@ app.post("/admin/remove/user/username",async (req,res)=>{
         await client.query(deleteUserQuery, [username]);
         await client.query("COMMIT");
         //add go back to dashboard button also
-        res.render("sucessfully_removed_user.ejs",{admindata:admindata});
+        res.render("sucessfully_removed_user.ejs",{admindata});
         console.log("User and all related records deleted successfully");
     } catch (error) {
         await client.query("ROLLBACK"); // Revert changes if an error occurs
         console.error("Error deleting user:", error);
         //add button to go back to dashboard also
-        res.render("failed_to_remove_by_admin.ejs",{admindata:admindata});
+        res.render("failed_to_remove_by_admin.ejs",{admindata});
     } finally {
         client.release();
     }
@@ -897,29 +906,31 @@ app.post("/admin/remove/user/username",async (req,res)=>{
 //update queries update button functionality
 app.post("/admin/update",async (req,res)=>{
     const{admindata}=req.body;
-    res.render("admin_update.ejs",{admindata:admindata});
+    res.render("admin_update.ejs",{admindata});
 });
 //check for checkbox input prompt handling from frontend and backend you have given in chatgpt
 //update stage 1: input username and role
 app.post("/admin/update/stage1",async (req,res)=>{
-    const{admindata,username,role}=req.body;
+    let {admindata,username,role}=req.body;
+    admindata=JSON.parse(admindata);
     try{
         let result;
         result=await pool.query('SELECT * FROM "user" WHERE username=$1 AND role=$2',[username,role]);
         if(result.rows.length>0){
             if(role=="patient")
-                res.render("patient_update_page_stage2.ejs",{admindata:admindata,userid:result.rows[0].user_id});
+                res.render("patient_update_page_stage2.ejs",{admindata,userid:result.rows[0].user_id});
             else
                 if(role=="doctor")
-                    res.render("doctor_update_page_stage2.ejs",{admindata:admindata,userid:result.rows[0].user_id});
+                    res.render("doctor_update_page_stage2.ejs",{admindata,userid:result.rows[0].user_id});
                 else
                     if(role=="receptionist")
-                        res.render("recetpionist_update_page_stage2.ejs",{admindata:admindata,userid:result.rows[0].user_id});
+                        res.render("receptionist_update_page_stage2.ejs",{admindata,userid:result.rows[0].user_id});
                                 }
             else                    
-            res.render("admin_update.ejs",{admindata:admindata,invalidcred:"false"});                    
+            res.render("admin_update.ejs",{admindata,invalidcred:"false"});                    
     }
     catch(error){
+        console.error(error);
         console.log("unable to search for username while admin update");
                 }
 
@@ -927,11 +938,11 @@ app.post("/admin/update/stage1",async (req,res)=>{
 //update stage 2: input new details for patient
 app.post("/admin/update/stage2/patient",async (req,res)=>{
     //update fields will contain all the checkbox field chosen or ticked
-    const { admindata, userid, updatefield } = req.body;
-
+    let { admindata, userid, updatefield } = req.body;
+    admindata=JSON.parse(admindata);
 if (!updatefield) {
     res.render("patient_update_page_stage2.ejs", {
-        admindata: admindata,
+        admindata,
         userid: userid,
         nofieldchosend: "false"
     });
@@ -941,53 +952,53 @@ if (!updatefield) {
 
     // Object to store which fields need updating
     let updateFlags = {
-        nameupdate: "false",
-        dobupdate: "false",
-        genderupdate: "false",
-        phoneupdate: "false",
-        emailupdate: "false",
-        addressupdate: "false",
-        bloodgroupupdate: "false",
-        medicalhistoryupdate: "false",
-        passwordupdate: "false"
+        name: "false",
+        dob: "false",
+        gender: "false",
+        phone: "false",
+        email: "false",
+        address: "false",
+        blood_group: "false",
+        medical_history: "false",
+        password: "false"
     };
 
     // Mark selected fields as "true"
     fieldsToUpdate.forEach(field => {
         switch (field) {
             case "name":
-                updateFlags.nameupdate = "true";
+                updateFlags.name = "true";
                 break;
             case "dob":
-                updateFlags.dobupdate = "true";
+                updateFlags.dob = "true";
                 break;
             case "gender":
-                updateFlags.genderupdate = "true";
+                updateFlags.gender = "true";
                 break;
             case "phone":
-                updateFlags.phoneupdate = "true";
+                updateFlags.phone = "true";
                 break;
             case "email":
-                updateFlags.emailupdate = "true";
+                updateFlags.email = "true";
                 break;
             case "address":
-                updateFlags.addressupdate = "true";
+                updateFlags.address = "true";
                 break;
             case "blood_group":
-                updateFlags.bloodgroupupdate = "true";
+                updateFlags.blood_group = "true";
                 break;
             case "medical_history":
-                updateFlags.medicalhistoryupdate = "true";
+                updateFlags.medical_history = "true";
                 break;
             case "password":
-                updateFlags.passwordupdate = "true";
+                updateFlags.password = "true";
                 break;
         }
     });
     //remember the chosen fields must be set as required use an if else construct
     // Render update page with selected fields
     res.render("patient_update_stage3.ejs", {
-        admindata: admindata,
+        admindata,
         userid: userid,
         chosenfields:updateFlags  // Spread all update flags into the template
     });
@@ -995,61 +1006,69 @@ if (!updatefield) {
 
 });
 //stage 3 for patient here we will receive new data and update all the fields
-    app.post("/admin/update/stage3/patient", async (req, res) => {
-        const { admindata, userid, chosenfields } = req.body;
-    
-        let client;
-        try {
-            client = await pool.connect();
-            await client.query("BEGIN");
-    
-            let updateQuery = "UPDATE patient SET ";
-            let updateValues = [];
-            let index = 1;
-    
-            // Convert chosenfields object back into an array of selected fields
-            let fieldsToUpdate = Object.keys(chosenfields).filter(field => chosenfields[field] === "true");
-    
-            fieldsToUpdate.forEach(field => {
-                if (field !== "password" && req.body[field]) {  // Exclude password update in patient table
-                    updateQuery += `${field} = $${index}, `;
-                    updateValues.push(req.body[field]);
-                    index++;
-                }
-            });
-    
-            if (updateValues.length > 0) {  // Only execute if there are valid updates
-                updateQuery = updateQuery.slice(0, -2) + ` WHERE user_id = $${index}`;
-                updateValues.push(userid);
-                await client.query(updateQuery, updateValues);
-            }
-    
-            // Handle password separately if included (No hashing)
-            if (fieldsToUpdate.includes("password") && req.body.password) {
-                await client.query("UPDATE \"user\" SET password = $1 WHERE user_id = $2", [req.body.password, userid]);
-            }
-    
-            await client.query("COMMIT");
-            //also add go back to admin dashboard button
-            res.render("successfully_updated.ejs", { admindata: admindata });
-    
-        } catch (error) {
-            console.error("Error updating patient:", error);
-            await client.query("ROLLBACK");
-             //also add go back to admin dashboard button
-            res.render("update_failed.ejs", { admindata: admindata });
-        } finally {
-            if (client) client.release();
+app.post("/admin/update/stage3/patient", async (req, res) => {
+    let { admindata, userid, chosenfields } = req.body;
+    admindata = JSON.parse(admindata);
+    chosenfields = JSON.parse(chosenfields); // Parse chosenfields
+    console.log(admindata);
+    console.log(chosenfields);
+    let client;
+    try {
+        client = await pool.connect();
+        await client.query("BEGIN");
+
+        let updateQuery = "UPDATE patient SET ";
+        let updateValues = [];
+        let index = 1;
+
+        // Convert chosenfields object back into an array of selected fields
+        let fieldsToUpdate = Object.keys(chosenfields).filter(field => chosenfields[field] === "true");
+
+        if (!fieldsToUpdate.length) {
+            throw new Error("No valid fields selected for update.");
         }
-    });
+
+        fieldsToUpdate.forEach(field => {
+             console.log(req.body[field]);
+            if (field !== "password" && req.body[field]) { // Exclude password from patient table updates
+                updateQuery += `${field} = $${index}, `;
+                updateValues.push(req.body[field]);
+                index++;
+            }
+        });
+
+        if (updateValues.length > 0) { // Execute query only if there are valid updates
+            updateQuery = updateQuery.slice(0, -2) + ` WHERE user_id = $${index}`;
+            updateValues.push(userid);
+            await client.query(updateQuery, updateValues);
+        }
+
+        // Handle password separately if included
+        if (fieldsToUpdate.includes("password") && req.body.password) {
+            await client.query('UPDATE "user" SET password = $1 WHERE user_id = $2', [req.body.password, userid]);
+        }
+
+        await client.query("COMMIT");
+        res.render("successfully_updated.ejs", { admindata });
+    } catch (error) {
+        console.error("Error updating patient:", error);
+        await client.query("ROLLBACK");
+        res.render("update_failed.ejs", { admindata });
+    } finally {
+        if (client) client.release();
+    }
+});
+
+
+
 
 // Update stage 2: Select fields to update for Receptionist
 app.post("/admin/update/stage2/receptionist", async (req, res) => {
-    const { admindata, userid, updatefield } = req.body;
-
+    let { admindata, userid, updatefield } = req.body;
+    admindata=JSON.parse(admindata);
     if (!updatefield) {
         return res.render("receptionist_update_page_stage2.ejs", {
-            admindata: admindata,
+             admindata,
             userid: userid,
             nofieldchosend: "false"
         });
@@ -1059,32 +1078,32 @@ app.post("/admin/update/stage2/receptionist", async (req, res) => {
     const fieldsToUpdate = Array.isArray(updatefield) ? updatefield : [updatefield];
 
     let updateFlags = {
-        nameupdate: "false",
-        emailupdate: "false",
-        phoneupdate: "false",
-        passwordupdate: "false"
+        name: "false",
+        email: "false",
+        phone: "false",
+        password: "false"
     };
 
     fieldsToUpdate.forEach(field => {
         switch (field) {
             case "name":
-                updateFlags.nameupdate = "true";
+                updateFlags.name = "true";
                 break;
             case "email":
-                updateFlags.emailupdate = "true";
+                updateFlags.email = "true";
                 break;
             case "phone":
-                updateFlags.phoneupdate = "true";
+                updateFlags.phone = "true";
                 break;
             case "password":
-                updateFlags.passwordupdate = "true";
+                updateFlags.password = "true";
                 break;
         }
     });
 
     // Render Stage 3 with chosen fields
     res.render("receptionist_update_stage3.ejs", {
-        admindata: admindata,
+        admindata,
         userid: userid,
         chosenfields: updateFlags
     });
@@ -1092,56 +1111,68 @@ app.post("/admin/update/stage2/receptionist", async (req, res) => {
 
 // Stage 3 for Receptionist - Receive new data and update in DB
 app.post("/admin/update/stage3/receptionist", async (req, res) => {
-    const { admindata, userid, chosenfields } = req.body;
-
+    let { admindata, userid, chosenfields } = req.body;
+    console.log(req.body);
+    admindata = JSON.parse(admindata);
+    chosenfields = JSON.parse(chosenfields); // Parse chosenfields
+    console.log(admindata);
+    console.log(chosenfields);
     let client;
     try {
         client = await pool.connect();
         await client.query("BEGIN");
 
-        let updateQuery = 'UPDATE receptionist SET ';
+        let updateQuery = "UPDATE receptionist SET ";
         let updateValues = [];
         let index = 1;
 
         let fieldsToUpdate = Object.keys(chosenfields).filter(field => chosenfields[field] === "true");
 
+        if (!fieldsToUpdate.length) {
+            throw new Error("No valid fields selected for update.");
+        }
+
         fieldsToUpdate.forEach(field => {
-            if (field !== "password" && req.body[field]) {  // Exclude password update in receptionist table
+           
+            if (field !== "password" && req.body[field]) { // Exclude password from receptionist table updates
                 updateQuery += `${field} = $${index}, `;
                 updateValues.push(req.body[field]);
                 index++;
             }
         });
 
-        if (updateValues.length > 0) { 
+        if (updateValues.length > 0) { // Execute query only if there are valid updates
             updateQuery = updateQuery.slice(0, -2) + ` WHERE user_id = $${index}`;
             updateValues.push(userid);
             await client.query(updateQuery, updateValues);
         }
 
-        // Handle password separately if selected (No hashing)
+        // Handle password separately if included
         if (fieldsToUpdate.includes("password") && req.body.password) {
             await client.query('UPDATE "user" SET password = $1 WHERE user_id = $2', [req.body.password, userid]);
         }
 
         await client.query("COMMIT");
-        res.render("successfully_updated.ejs", { admindata: admindata });
-
+        res.render("successfully_updated.ejs", { admindata });
     } catch (error) {
         console.error("Error updating receptionist:", error);
         await client.query("ROLLBACK");
-        res.render("update_failed.ejs", { admindata: admindata });
+        res.render("update_failed.ejs", { admindata });
     } finally {
         if (client) client.release();
     }
 });
+
+
+
+
 // Update stage 2: Select fields to update for Doctor
 app.post("/admin/update/stage2/doctor", async (req, res) => {
-    const { admindata, userid, updatefield } = req.body;
-
+    let { admindata, userid, updatefield } = req.body;
+    admindata=JSON.parse(admindata);
     if (!updatefield) {
         return res.render("doctor_update_page_stage2.ejs", {
-            admindata: admindata,
+             admindata,
             userid: userid,
             nofieldchosend: "false"
         });
@@ -1151,94 +1182,104 @@ app.post("/admin/update/stage2/doctor", async (req, res) => {
     const fieldsToUpdate = Array.isArray(updatefield) ? updatefield : [updatefield];
 
     let updateFlags = {
-        nameupdate: "false",
-        specializationupdate: "false",
-        phoneupdate: "false",
-        emailupdate: "false",
-        availabilityupdate: "false",
-        passwordupdate: "false"
+        name: "false",
+        specializatio: "false",
+        phone: "false",
+        email: "false",
+        availability: "false",
+        password: "false"
     };
 
     fieldsToUpdate.forEach(field => {
         switch (field) {
             case "name":
-                updateFlags.nameupdate = "true";
+                updateFlags.name = "true";
                 break;
             case "specialization":
-                updateFlags.specializationupdate = "true";
+                updateFlags.specialization = "true";
                 break;
             case "phone":
-                updateFlags.phoneupdate = "true";
+                updateFlags.phone = "true";
                 break;
             case "email":
-                updateFlags.emailupdate = "true";
+                updateFlags.email = "true";
                 break;
             case "availability":
-                updateFlags.availabilityupdate = "true";
+                updateFlags.availability = "true";
                 break;
             case "password":
-                updateFlags.passwordupdate = "true";
+                updateFlags.password = "true";
                 break;
         }
     });
 
     // Render Stage 3 with chosen fields
     res.render("doctor_update_stage3.ejs", {
-        admindata: admindata,
+        admindata,
         userid: userid,
         chosenfields: updateFlags
     });
 });
 // Stage 3 for Doctor - Receive new data and update in DB
 app.post("/admin/update/stage3/doctor", async (req, res) => {
-    const { admindata, userid, chosenfields } = req.body;
-
+    let { admindata, userid, chosenfields } = req.body;
+    admindata = JSON.parse(admindata);
+    chosenfields = JSON.parse(chosenfields); // Parse chosenfields
+    console.log(admindata);
+    console.log(chosenfields);
     let client;
     try {
         client = await pool.connect();
         await client.query("BEGIN");
 
-        let updateQuery = 'UPDATE doctor SET ';
+        let updateQuery = "UPDATE doctor SET ";
         let updateValues = [];
         let index = 1;
 
         let fieldsToUpdate = Object.keys(chosenfields).filter(field => chosenfields[field] === "true");
 
+        if (!fieldsToUpdate.length) {
+            throw new Error("No valid fields selected for update.");
+        }
+
         fieldsToUpdate.forEach(field => {
-            if (field !== "password" && req.body[field]) {  // Exclude password update in doctor table
+            if (field !== "password" && req.body[field]) { // Exclude password from doctor table updates
                 updateQuery += `${field} = $${index}, `;
                 updateValues.push(req.body[field]);
                 index++;
             }
         });
 
-        if (updateValues.length > 0) { 
+        if (updateValues.length > 0) { // Execute query only if there are valid updates
             updateQuery = updateQuery.slice(0, -2) + ` WHERE user_id = $${index}`;
             updateValues.push(userid);
             await client.query(updateQuery, updateValues);
         }
 
-        // Handle password separately if selected (No hashing)
+        // Handle password separately if included
         if (fieldsToUpdate.includes("password") && req.body.password) {
             await client.query('UPDATE "user" SET password = $1 WHERE user_id = $2', [req.body.password, userid]);
         }
 
         await client.query("COMMIT");
-        res.render("successfully_updated.ejs", { admindata: admindata });
-
+        res.render("successfully_updated.ejs", { admindata });
     } catch (error) {
         console.error("Error updating doctor:", error);
         await client.query("ROLLBACK");
-        res.render("update_failed.ejs", { admindata: admindata });
+        res.render("update_failed.ejs", { admindata });
     } finally {
         if (client) client.release();
     }
 });
 
+
+
+
 //admin go back to dashboard
-app.get("/admin/dashboard",async (req,res)=>{
-    const{admindata}=req.body;
-    res.render("admin_dashboard.ejs",{admindata:admindata});
+app.post("/admin/dashboard",async (req,res)=>{
+    let {admindata}=req.body;
+    admindata=JSON.parse(admindata);
+    res.render("admin_dashboard.ejs",{admindata});
 });
 //logout
 app.get("/logout",async (req, res) => {

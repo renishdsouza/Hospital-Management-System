@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Update Doctor Details</title>
+    <style>
+        .error-message {
+            background-color: #FF5733;
+            color: white;
+            padding: 10px;
+            margin: 10px 0;
+            display: none;
+        }
+    </style>
+    <script>
+        document.addEventListener("DOMContentLoaded", function() {
+            const errorMessage = document.getElementById("error-message");
+
+            if (errorMessage) errorMessage.style.display = "block";
+
+            setTimeout(() => {
+                if (errorMessage) errorMessage.style.display = "none";
+            }, 3000);
+        });
+    </script>
+</head>
+<body>
+    <h1>Update Doctor Details</h1>
+
+    <!-- Error Message -->
+    <% if (typeof nofieldchosend !== 'undefined' && nofieldchosend === "false") { %>
+        <div id="error-message" class="error-message">No fields selected for update. Please choose at least one field.</div>
+    <% } %>
+
+    <!-- Form to Select Fields to Update -->
+    <form action="/admin/update/stage2/doctor" method="post">
+        <p>Select the fields you want to update:</p>
+
+        <input type="checkbox" id="name" name="updatefield" value="name">
+        <label for="name">Name</label><br/>
+
+        <input type="checkbox" id="specialization" name="updatefield" value="specialization">
+        <label for="specialization">Specialization</label><br/>
+
+        <input type="checkbox" id="phone" name="updatefield" value="phone">
+        <label for="phone">Phone</label><br/>
+
+        <input type="checkbox" id="email" name="updatefield" value="email">
+        <label for="email">Email</label><br/>
+
+        <input type="checkbox" id="availability" name="updatefield" value="availability">
+        <label for="availability">Availability</label><br/>
+
+        <input type="checkbox" id="password" name="updatefield" value="password">
+        <label for="password">Password</label><br/>
+
+        <!-- Hidden Admin Data -->
+        <input type="hidden" name="admindata" value='<%= JSON.stringify(admindata) %>'>
+
+        <!-- Hidden User ID -->
+        <input type="hidden" name="userid" value="<%= userid %>">
+
+        <!-- Submit Button -->
+        <button type="submit">Next</button>
+    </form>
+
+    <!-- Go Back to Dashboard -->
+    <form action="/admin/dashboard" method="post">
+        <input type="hidden" name="admindata" value='<%= JSON.stringify(admindata) %>'>
+        <button type="submit">Go Back to Dashboard</button>
+    </form>
+
+</body>
+</html>

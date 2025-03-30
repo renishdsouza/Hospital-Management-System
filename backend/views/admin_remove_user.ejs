@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Remove User</title>
+</head>
+<body>
+    <h1>Remove User</h1>
+
+    <!-- Form to Remove User -->
+    <form action="/admin/remove/user/username" method="post">
+        <label for="username">Enter Username:</label><br/>
+        <input type="text" id="username" name="username" required><br/>
+
+        <!-- Hidden Admin Data -->
+        <input type="hidden" name="admindata" value='<%= JSON.stringify(admindata) %>'>
+
+        <!-- Submit Button -->
+        <button type="submit">Remove User</button>
+    </form>
+
+    <!-- Go Back to Dashboard -->
+    <form action="/admin/dashboard" method="post">
+        <input type="hidden" name="admindata" value='<%= JSON.stringify(admindata) %>'>
+        <button type="submit">Go Back to Dashboard</button>
+    </form>
+
+</body>
+</html>

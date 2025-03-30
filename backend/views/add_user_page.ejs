@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Add New User</title>
+</head>
+<body>
+    <% if (useralreadypresent === "true") { %>
+        <div id="error-message" class="error-message">Username is already taken!</div>
+    <% } %>
+
+    <h1>Add New User</h1>
+
+    <!-- Form to Add New User -->
+    <form action="/admin/add/new/user/stage1" method="post">
+        <label for="username">Username:</label><br/>
+        <input type="text" id="username" name="username" required><br/>
+
+        <label for="password">Password:</label><br/>
+        <input type="password" id="password" name="password" required><br/>
+
+        <label for="role">Role:</label><br/>
+        <select id="role" name="role" required>
+            <option value="">Select Role</option>
+            <option value="patient">Patient</option>
+            <option value="doctor">Doctor</option>
+            <option value="receptionist">Receptionist</option>
+        </select><br/>
+
+        <!-- Hidden Admin Data -->
+        <input type="hidden" name="admindata" value='<%= JSON.stringify(admindata) %>'>
+
+        <!-- Submit Button -->
+        <button type="submit">Next</button>
+    </form>
+
+    <!-- Go Back to Dashboard -->
+    <form action="/admin/dashboard" method="post">
+        <input type="hidden" name="admindata" value='<%= JSON.stringify(admindata) %>'>
+        <button type="submit">Go Back to Dashboard</button>
+    </form>
+
+</body>
+</html>

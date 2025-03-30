@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard</title>
+    <style>
+        .success-message {
+            background-color: #4CAF50;
+            color: white;
+            padding: 10px;
+            margin: 10px 0;
+            display: none;
+        }
+        .error-message {
+            background-color: #FF5733;
+            color: white;
+            padding: 10px;
+            margin: 10px 0;
+            display: none;
+        }
+    </style>
+    <script>
+        document.addEventListener("DOMContentLoaded", function() {
+            const successMessage = document.getElementById("success-message");
+            const errorMessage = document.getElementById("error-message");
+
+            if (successMessage) successMessage.style.display = "block";
+            if (errorMessage) errorMessage.style.display = "block";
+
+            setTimeout(() => {
+                if (successMessage) successMessage.style.display = "none";
+                if (errorMessage) errorMessage.style.display = "none";
+            }, 3000);
+        });
+    </script>
+</head>
+<body>
+    <%-include("header_logout.ejs");%>
+    <!-- change this to display the admin name if you wnat-->
+    <h1>Welcome, Admin</h1>
+
+    <!-- Add New User -->
+    <form action="/admin/dashboard/users/add" method="post">
+        <input type="hidden" name="admindata" value='<%= JSON.stringify(admindata) %>'>
+        <button type="submit">Add New User</button>
+    </form>
+
+    <!-- Remove User -->
+    <form action="/admin/remove/user" method="post">
+        <input type="hidden" name="admindata" value='<%= JSON.stringify(admindata) %>'>
+        <button type="submit">Remove User</button>
+    </form>
+
+    <!-- Update User -->
+    <form action="/admin/update" method="post">
+        <input type="hidden" name="admindata" value='<%= JSON.stringify(admindata) %>'>
+        <button type="submit">Update User</button>
+    </form>
+
+    
+
+    <!-- Footer -->
+    <%-include("footer.ejs") %>
+</body>
+</html>

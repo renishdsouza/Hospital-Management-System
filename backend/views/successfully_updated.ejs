@@ -1,0 +1,18 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Successfully Updated</title>
+</head>
+<body>
+    <h1>User Details Updated Successfully!</h1>
+
+    <!-- Go Back to Dashboard -->
+    <form action="/admin/dashboard" method="post">
+        <input type="hidden" name="admindata" value='<%= JSON.stringify(admindata) %>'>
+        <button type="submit">Go Back to Dashboard</button>
+    </form>
+
+</body>
+</html>

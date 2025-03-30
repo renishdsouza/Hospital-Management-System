@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Update User Details</title>
+    <style>
+        .error-message {
+            background-color: #FF5733;
+            color: white;
+            padding: 10px;
+            margin: 10px 0;
+            display: none;
+        }
+    </style>
+    <script>
+        document.addEventListener("DOMContentLoaded", function() {
+            const errorMessage = document.getElementById("error-message");
+
+            if (errorMessage) errorMessage.style.display = "block";
+
+            setTimeout(() => {
+                if (errorMessage) errorMessage.style.display = "none";
+            }, 3000);
+        });
+    </script>
+</head>
+<body>
+    <h1>Update User Details</h1>
+
+    <!-- Error Message -->
+    <% if (typeof invalidcred !== 'undefined' && invalidcred === "false") { %>
+        <div id="error-message" class="error-message">Invalid username or role. Please try again.</div>
+    <% } %>
+
+    <!-- Form to Update User -->
+    <form action="/admin/update/stage1" method="post">
+        <label for="username">Enter Username:</label><br/>
+        <input type="text" id="username" name="username" required><br/>
+
+        <label for="role">Select Role:</label><br/>
+        <select id="role" name="role" required>
+            <option value="">Select Role</option>
+            <option value="patient">Patient</option>
+            <option value="doctor">Doctor</option>
+            <option value="receptionist">Receptionist</option>
+        </select><br/>
+
+        <!-- Hidden Admin Data -->
+        <input type="hidden" name="admindata" value='<%= JSON.stringify(admindata) %>'>
+
+        <!-- Submit Button -->
+        <button type="submit">Next</button>
+    </form>
+
+    <!-- Go Back to Dashboard -->
+    <form action="/admin/dashboard" method="post">
+        <input type="hidden" name="admindata" value='<%= JSON.stringify(admindata) %>'>
+        <button type="submit">Go Back to Dashboard</button>
+    </form>
+
+</body>
+</html>

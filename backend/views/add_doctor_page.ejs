@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Add Doctor</title>
+    
+</head>
+<body>
+    <h1>Add Doctor</h1>
+
+    <!-- Form to Add Doctor -->
+    <form action="/admin/add/new/doctor/stage2" method="post">
+        <label for="name">Name:</label><br/>
+        <input type="text" id="name" name="name" required><br/>
+
+        <label for="specialization">Specialization:</label><br/>
+        <input type="text" id="specialization" name="specialization" required><br/>
+
+        <label for="phone">Phone:</label><br/>
+        <input type="text" id="phone" name="phone" required pattern="[0-9]{10}" title="Enter a valid 10-digit phone number"><br/>
+
+        <label for="email">Email:</label><br/>
+        <input type="email" id="email" name="email" required><br/>
+
+        <label for="availability">Availability:</label><br/>
+        <input type="text" id="availability" name="availability" placeholder="e.g., 9AM - 5PM" required><br/>
+
+        <!-- Hidden Admin Data -->
+        <input type="hidden" name="admindata" value='<%= JSON.stringify(admindata) %>'>
+
+        <!-- Hidden User ID -->
+        <input type="hidden" name="userid" value="<%= userid %>">
+
+        <!-- Submit Button -->
+        <button type="submit">Add Doctor</button>
+    </form>
+
+    <!-- Go Back to Dashboard -->
+    
+
+</body>
+</html>

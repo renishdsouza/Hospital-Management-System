@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Add Receptionist</title>
+    
+
+</head>
+<body>
+    <h1>Add Receptionist</h1>
+
+    <!-- Form to Add Receptionist -->
+    <form action="/admin/add/new/receptionist/stage2" method="post">
+        <label for="name">Name:</label><br/>
+        <input type="text" id="name" name="name" required><br/>
+
+        <label for="phone">Phone:</label><br/>
+        <input type="text" id="phone" name="phone" required pattern="[0-9]{10}" title="Enter a valid 10-digit phone number"><br/>
+
+        <label for="email">Email:</label><br/>
+        <input type="email" id="email" name="email" required><br/>
+
+        <!-- Hidden Admin Data -->
+        <input type="hidden" name="admindata" value='<%= JSON.stringify(admindata) %>'>
+
+        <!-- Hidden User ID -->
+        <input type="hidden" name="userid" value="<%= userid %>">
+
+        <!-- Submit Button -->
+        <button type="submit">Add Receptionist</button>
+    </form>
+
+    
+
+</body>
+</html>
