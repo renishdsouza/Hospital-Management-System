@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Select Role</title>
+</head>
+<body>
+    <h1>Select Role to View Users</h1>
+
+    <!-- Form to Select Role -->
+    <form action="/admin/viewusers/role" method="post">
+        <label for="role">Select Role:</label><br/>
+        <select id="role" name="role" required>
+            <option value="">Select Role</option>
+            <option value="patient">Patient</option>
+            <option value="doctor">Doctor</option>
+            <option value="receptionist">Receptionist</option>
+        </select><br/>
+
+        <!-- Hidden Admin Data -->
+        <input type="hidden" name="admindata" value='<%= JSON.stringify(admindata) %>'>
+
+        <!-- Submit Button -->
+        <button type="submit">Next</button>
+    </form>
+
+    <!-- Go Back to Dashboard -->
+    <form action="/admin/dashboard" method="post">
+        <input type="hidden" name="admindata" value='<%= JSON.stringify(admindata) %>'>
+        <button type="submit">Go Back to Dashboard</button>
+    </form>
+
+</body>
+</html>

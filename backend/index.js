@@ -1271,8 +1271,57 @@ app.post("/admin/update/stage3/doctor", async (req, res) => {
         if (client) client.release();
     }
 });
+//view user
+app.post("/admin/viewusers", async (req, res) => {
+    const { admindata } = req.body;
+    res.render("admin_select_role.ejs", { admindata });
+});
 
+app.post("/admin/viewusers/role", async (req, res) => {
+    const { admindata, role } = req.body;
+    admindata = JSON.parse(admindata);
 
+    try {
+        let queryResult;
+
+        if (role === "patient") {
+            queryResult = await pool.query(
+                `SELECT "user".username, patient.name, patient.phone
+                 FROM "user"
+                 JOIN patient ON "user".user_id = patient.user_id
+                 WHERE "user".role = $1`,
+                [role]
+            );
+        } else if (role === "doctor") {
+            queryResult = await pool.query(
+                `SELECT "user".username, doctor.name, doctor.phone
+                 FROM "user"
+                 JOIN doctor ON "user".user_id = doctor.user_id
+                 WHERE "user".role = $1`,
+                [role]
+            );
+        } else if (role === "receptionist") {
+            queryResult = await pool.query(
+                `SELECT "user".username, receptionist.name, receptionist.phone
+                 FROM "user"
+                 JOIN receptionist ON "user".user_id = receptionist.user_id
+                 WHERE "user".role = $1`,
+                [role]
+            );
+        } else {
+            return res.status(400).send("Invalid role selected.");
+        }
+
+        res.render("admin_view_users.ejs", {
+            admindata,
+            role,
+            users: queryResult.rows,
+        });
+    } catch (error) {
+        console.error("Error fetching user details:", error);
+        res.status(500).send("Internal Server Error");
+    }
+});
 
 
 //admin go back to dashboard

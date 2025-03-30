@@ -57,6 +57,11 @@
         <input type="hidden" name="admindata" value='<%= JSON.stringify(admindata) %>'>
         <button type="submit">Update User</button>
     </form>
+    <!--view usernames-->
+    <form action="/admin/viewusers" method="post">
+        <input type="hidden" name="admindata" value='<%= JSON.stringify(admindata)%>'>
+        <button type="submit">View Username</button>
+    </form>
 
     
 
