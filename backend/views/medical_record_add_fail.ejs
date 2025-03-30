@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Medical Record Addition Failed</title>
+</head>
+<body>
+    <h1>Failed to Add Medical Record!</h1>
+    <p>An error occurred while adding the medical record. Please try again later.</p>
+
+    <!-- Go Back to Add Medical Record Page -->
+    <form action="/doctor/dashboard/appointments/medicalrecord" method="post">
+        <input type="hidden" name="doctordata" value="<%= JSON.stringify(doctordata) %>">
+        <button type="submit">Try Again</button>
+    </form>
+
+    <!-- Go Back to Dashboard -->
+    <form action="/doctor/dashboard" method="post">
+        <input type="hidden" name="doctordata" value="<%= JSON.stringify(doctordata) %>">
+        <button type="submit">Go Back to Dashboard</button>
+    </form>
+</body>
+</html>

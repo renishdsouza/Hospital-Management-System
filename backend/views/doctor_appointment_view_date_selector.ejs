@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Select Appointment Date</title>
+</head>
+<body>
+    <%- include("header_logout.ejs") %>
+    <h1>Select a Date to View Appointments</h1>
+
+    <!-- Date Selection Form -->
+    <form action="/doctor/dashboard/appointments/date" method="post">
+    <input type="hidden" name="doctordata" value="<%= JSON.stringify(doctordata) %>">
+    <label for="date">Select Date:</label>
+    <input type="date" id="date" name="date" required>
+    <button type="submit">View Appointments</button>
+</form>
+
+    
+
+    <!-- Go Back to Dashboard -->
+    <form action="/doctor/dashboard" method="post">
+        <input type="hidden" name="doctordata" value="<%= JSON.stringify(doctordata) %>">
+        <button type="submit">Go Back to Dashboard</button>
+    </form>
+
+</body>
+</html>

@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Invalid Patient Details</title>
+</head>
+<body>
+    <h1>Invalid Patient Details</h1>
+    <p>The patient username you entered does not exist. Please try again.</p>
+
+    <!-- Go Back to Add Medical Record Page -->
+    <form action="/doctor/dashboard/appointments/medicalrecord" method="post">
+        <input type="hidden" name="doctordata" value="<%= JSON.stringify(doctordata) %>">
+        <input type="hidden" name="appointmentdata" value="<%= JSON.stringify(appointmentdata) %>">
+        <button type="submit">Try Again</button>
+    </form>
+
+    <!-- Go Back to Dashboard -->
+    <form action="/doctor/dashboard" method="post">
+        <input type="hidden" name="doctordata" value="<%= JSON.stringify(doctordata) %>">
+        <button type="submit">Go Back to Dashboard</button>
+    </form>
+</body>
+</html>

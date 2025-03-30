@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Doctor View Appointments</title>
+    <style>
+        table {
+            width: 80%;
+            margin: auto;
+            border-collapse: collapse;
+            text-align: center;
+        }
+        th, td {
+            border: 1px solid black;
+            padding: 10px;
+        }
+        th {
+            background-color: lightgray;
+        }
+    </style>
+</head>
+<body>
+    <h2>Appointments for <%= date %></h2>
+
+    <% if (appointmentsData.length > 0) { %>
+        <table>
+            <thead>
+                <tr>
+                    <th>Patient Name</th>
+                    <th>Date of Birth</th>
+                    <th>Appointment Time</th>
+                    <th>Status</th>
+                </tr>
+            </thead>
+            <tbody>
+                <% appointmentsData.forEach(appointment => { %>
+                    <tr>
+                        <td><%= appointment.patient_name || "N/A" %></td>
+                        <td><%= appointment.patient_dob || "N/A" %></td>
+                        <td><%= appointment.appointment_time || "N/A" %></td>
+                        <td><%= appointment.status || "N/A" %></td>
+                    </tr>
+                <% }) %>
+            </tbody>
+        </table>
+
+    <% } else { %>
+        <p>No appointments found for the selected date.</p>
+
+        <!-- Go Back to Date Selection -->
+        <form action="/doctor/dashboard/appointments" method="post">
+            <input type="hidden" name="doctordata" value="<%= JSON.stringify(doctordata) %>">
+            <button type="submit">Choose Another Date</button>
+        </form>
+    <% } %>
+
+    <!-- Go Back to Dashboard -->
+    <form action="/doctor/dashboard" method="post">
+        <input type="hidden" name="doctordata" value="<%= JSON.stringify(doctordata) %>">
+        <button type="submit">Go Back to Dashboard</button>
+    </form>
+
+</body>
+</html>

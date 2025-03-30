@@ -1,0 +1,17 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Medical Record Added</title>
+</head>
+<body>
+    <h1>Medical Record Added Successfully!</h1>
+
+    <!-- Go Back to Dashboard -->
+    <form action="/doctor/dashboard" method="post">
+        <input type="hidden" name="doctordata" value="<%= JSON.stringify(doctordata) %>">
+        <button type="submit">Go Back to Dashboard</button>
+    </form>
+</body>
+</html>

@@ -48,8 +48,8 @@
                 <tbody>
                     <% appointments.forEach(appointment => { %>
                         <tr>
-                            <td><%= appointment.date ? new Date(appointment.date).toISOString().split('T')[0] : "N/A" %></td>
-                            <td><%= appointment.time ? appointment.time : "N/A" %></td>
+                            <td><%= appointment.appointment_date ? new Date(appointment.appointment_date).toISOString().split('T')[0] : "N/A" %></td>
+                            <td><%= appointment.appointment_time ? appointment.appointment_time : "N/A" %></td>
                             <td><%= appointment.doctor_name ? appointment.doctor_name : "N/A" %></td>
                             <td><%= appointment.specialization ? appointment.specialization : "N/A" %></td>
                             <td><%= appointment.status ? appointment.status : "N/A" %></td>

@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Select Date to Update Appointment Status</title>
+</head>
+<body>
+    <%- include("header_logout.ejs") %>
+    <h1>Select a Date to Update Appointment Status</h1>
+
+    <!-- Date Selection Form -->
+    <form action="/doctor/dashboard/appointments/update/date" method="post">
+        <label for="date">Date:</label>
+        <input type="date" id="date" name="date"><br/>
+
+        <!-- Hidden Doctor Data -->
+        <input type="hidden" name="doctordata" value="<%= JSON.stringify(doctordata) %>">
+
+        <!-- Submit Button -->
+        <button type="submit">Submit</button>
+    </form>
+
+    <!-- Go Back to Dashboard -->
+    <form action="/doctor/dashboard" method="post">
+        <input type="hidden" name="doctordata" value="<%= JSON.stringify(doctordata) %>">
+        <button type="submit">Go Back to Dashboard</button>
+    </form>
+
+</body>
+</html>

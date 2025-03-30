@@ -35,70 +35,7 @@ app.get('/', async (req, res) => {
 });
 //on all dashboard add a logout button
 // Login Route
-app.post("/login/submit", async (req, res) => {
-    const { username, password, role } = req.body;
-
-    try {
-        const result = await pool.query(
-            'SELECT * FROM "user" WHERE username = $1 AND password = $2 AND role = $3',
-            [username, password, role]
-        );
-
-        if (result.rows.length === 0) {
-            return res.render("login.ejs", { status: "false" });
-        }
-
-        const user_id = result.rows[0].user_id;
-
-        let query = "";
-        let roleData = {};
-        let dashboardView = "";
-
-        if (role === "patient") {
-            query = 'SELECT * FROM "patient" WHERE user_id=$1';
-            dashboardView = "patient_dashboard.ejs";
-        } else if (role === "doctor") {
-            query = 'SELECT * FROM "doctor" WHERE user_id=$1';
-            dashboardView = "doctor_dashboard.ejs";
-        } else if (role === "admin") {
-            query = 'SELECT * FROM "admin" WHERE user_id=$1';
-            dashboardView = "admin_dashboard.ejs";
-        } else if (role === "receptionist") {
-            query = 'SELECT * FROM "receptionist" WHERE user_id=$1';
-            dashboardView = "reception_dashboard.ejs";
-        } else {
-            return res.status(400).send("Invalid role selected.");
-        }
-
-        const roleResult = await pool.query(query, [user_id]);
-
-        if (roleResult.rows.length === 0) {
-            console.log(`User entry exists but ${role} table entry is missing`);
-            return res.status(404).send(`${role} data not found`);
-        }
-
-        roleData = roleResult.rows[0];
-
-        // ✅ Ensure correct variable names are passed based on role
-        if (role === "patient") {
-            return res.render(dashboardView, {
-                patientdata: roleData
-            });
-        } else if (role === "doctor") {
-            return res.render(dashboardView, { doctordata: roleData });
-        } else if (role === "admin") {
-            return res.render(dashboardView, { admindata: roleData });
-        } else if (role === "receptionist") {
-            return res.render(dashboardView, { receptionistdata: roleData });
-        }
-
-    } catch (err) {
-        console.error("Error during login:", err);
-        res.status(500).send("Server error");
-    }
-});
-
-
+ 
 
 //reception new patient register button action
 // Reception New Patient Register Button Action
@@ -507,9 +444,6 @@ app.post("/patients/medical/records", async (req, res) => {
 
 
 
-
-
-
 // go back to dashboard patient
 app.post("/patients/dashboard", (req, res) => {
     try {
@@ -525,130 +459,117 @@ app.post("/patients/dashboard", (req, res) => {
 
 
 //doctor dashboard view appointments button
-app.post("/doctor/dashboard/appoinments",async (req,res)=>{
-    const{doctordata}=req.body;
-    res.render("doctor_appointment_view_date_selector.ejs",{doctordata:doctordata});
-   
+// Doctor Dashboard View Appointments Button
+app.post("/doctor/dashboard/appointments", async (req, res) => {
+    const { doctordata } = req.body;
+    res.render("doctor_appointment_view_date_selector.ejs", { doctordata });
 });
-//allow option to choose a date and click submit and after displayin appointments there will be a button for
-//go back to dashboard
-app.post("/doctor/dashboard/appoinments/date",async (req,res)=>{
-    const{doctordata,date}=req.body;
-    try{
-        let doctorappoinmentsresult;
-        doctorappoinmentsresult=await pool.query("SELECT appointment.*, patient.username AS patient_username FROM appointment JOIN patient ON appointment.patient_id = patient.patient_id WHERE appointment.doctor_id = $1 AND appointment.date = $2",[doctordata.doctor_id,date]);
-        if(doctorappoinmentsresult.rows.length>0)
-            //here we are sending the patien names and username to uniquely identify patients
-            res.render("doctor_display_appointments.ejs",{doctordata:doctordata,appoimentsdata:doctorappoinmentsresult.rows});
-        else
-            res.render("doctor_no_appointments_there_page.ejs",{doctordata:doctordata});
-    } catch{
-        console.log("Error in doctor view appointments page");
-    }
-});
-//update appointment details of the day button fuctionality available on the display appointment page
-//from the appointments he choose the patient username and patient name
-app.post("/doctor/dashboard/appoinments/update",async (req,res)=>{
-    const{doctordata,appointmentdata}=req.body;
-    res.render("appointment_status_update.ejs",{doctordata:doctordata,appointmentdata:appointmentdata});
-});
-//update appointment status page upon submit of the username of patient 
-app.post("/doctor/dashboard/appoinments/update/status",async (req,res)=>{
-    const{doctordata,appointmentdata,username,status}=req.body;
-    try{
-        let patientresult;
-        patientresult=await pool.query("SELECT patient_id FROM patient WHERE username = $1",[username]);
-        let patientid=patientresult.rows[0].patient_id;
-        const client=await pool.connect();
-        try{
-           await client.query("BEGIN");
-           await client.query("UPDATE appointment SET status = $1 WHERE patient_id=$2 AND doctor_id=$3,AND date=$4",[status,patientid,doctordata.doctor_id,appointmentdata.rows[0].date]);
-           await client.query("COMMIT");
-                       //in the below rendered page add the go back to dashboard button
-           res.render("appointment_status_updated.ejs",{doctordata:doctordata});
-        }
-        catch(error){
-            await client.query("ROLLBACK");
-            console.log("Error in updating appointment status");
-            //in the below rendered page add the go back to dashboard button
-            res.render("appointment_status_update_failed.ejs",{doctordata:doctordata});
-        }
-    }
-    catch{
-        console.log("Error in finding patiend id while appointment update from doctor");
-    }
-});
-//from the display appointments page add medical record button
-app.post("/doctor/dashboard/appoinments/medicalrecord",async (req,res)=>{
-    const{doctordata,appointmentdata}=req.body;
-    //remember we are not giving him an optinon to choose any date that we will have to store in the medical
-    //records table
-    //in the below page the doctor must enter patient username along with diagnosis,prescription
-    res.render("add_medical_record_page.ejs",{doctordata:doctordata,appointmentdata:appointmentdata});
-});
-//now we will recive the patient username and the details of the colums of medical records
-app.post("/doctor/dashboard/appoinments/medicalrecord/add",async (req,res)=>{
-    const{doctordata,username,diagnosis,prescription}=req.body;
-    try{
-        let patientresult;
-        patientresult=await pool.query("SELECT patient_id FROM patient WHERE username = $1",[username]);
-        if(patientresult.rows.length<=0)
-            //add go back to dashboard button also
-            res.render("invalid_patient_details_page.ejs",{doctordata:doctordata});
-        else{    
-        let patientid=patientresult.rows[0].patient_id;
-        const client=await pool.connect();
-        try{
-           await client.query("BEGIN");
-           await client.query("INSERT INTO medicalrecords (patient_id, doctor_id, diagnosis, prescription) VALUES ($1, $2, $3, $4)",[patientid,doctordata.doctor_id,diagnosis,prescription]);
-           await client.query("COMMIT");
-                       //in the below rendered page add the go back to dashboard button
-           res.render("medical_record_added_page.ejs",{doctordata:doctordata});
-        }
-        catch(error){
-            await client.query("ROLLBACK");
-            console.log("Error in adding medical recors");
-            //in the below rendered page add the go back to dashboard button
-            res.render("medical_record_add_fail.ejs",{doctordata:doctordata});
-        }
-    }
-    }
-    catch{
-        console.log("Error in finding patiend id while appointment update from doctor");
-    }
 
-});
-//update appointment button functionality from dashboard
-app.post("/doctor/dashboard/appoinments/updatestatus",async (req,res)=>{
-    const{doctordata}=req.body;
-    res.render("direct_status_update_appointment.ejs",{doctordata:doctordata});
-});
-//update appointment status after date is submitted from form 
-app.post("/doctor/dashboard/appoinments/date",async (req,res)=>{
-    const{doctordata,date}=req.body;
-    try{
-        let doctorappoinmentsresult;
-        doctorappoinmentsresult=await pool.query("SELECT appointment.*, patient.username AS patient_username FROM appointment JOIN patient ON appointment.patient_id = patient.patient_id WHERE appointment.doctor_id = $1 AND appointment.date = $2",[doctordata.doctor_id,date]);
-        if(doctorappoinmentsresult.rows.length>0)
-            //here we are sending the patien names and username to uniquely identify patients
-            res.redirect("/doctor/dashboard/appoinments/update",{doctordata:doctordata,appointmentdata:doctorappoinmentsresult.rows});
-        else
-            res.render("doctor_no_appointments_there_page.ejs",{doctordata:doctordata});
-    } catch{
-        console.log("Error in doctor view appointments page");
+// Allow option to choose a date and display appointments
+app.post("/doctor/dashboard/appointments/date", async (req, res) => {
+    const { doctordata, date } = req.body;
+    try {
+        const doctorAppointmentsResult = await pool.query(
+            "SELECT appointment.*, patient.username AS patient_username FROM appointment JOIN patient ON appointment.patient_id = patient.patient_id WHERE appointment.doctor_id = $1 AND appointment.date = $2",
+            [doctordata.doctor_id, date]
+        );
+
+        // Render the same EJS file regardless of whether appointments exist or not
+        res.render("doctor_display_appointments.ejs", {
+            doctordata,
+            appointmentsData: doctorAppointmentsResult.rows,
+            date,
+        });
+    } catch (error) {
+        console.error("Error in doctor view appointments page:", error);
+        res.status(500).send("Internal Server Error");
     }
-    
 });
-//add medical records functionality
-app.post("/doctor/dashboard/appoinments/medicalrecord/add",async (req,res)=>{
-    const{doctordata}=req.body;
-    //in this page the doctor will have to enter paitent username
-    res.render("add_medical_record_page.ejs",{doctordata:doctordata});
+
+
+// Update Appointment Details of the Day Button Functionality
+app.post("/doctor/dashboard/appointments/update", async (req, res) => {
+    const { doctordata, appointmentdata } = req.body;
+    res.render("appointment_status_update.ejs", { doctordata, appointmentdata });
 });
-//go back to doctor dashboard button
-app.post("/doctor/dashboard",async (req,res)=>{
-    const{doctordata}=req.body;
-    res.render("doctor_dashboard.ejs",{doctordata:doctordata});
+
+// Update Appointment Status Page
+app.post("/doctor/dashboard/appointments/update/status", async (req, res) => {
+    const { doctordata, appointmentdata, username, status } = req.body;
+    try {
+        const patientResult = await pool.query("SELECT patient_id FROM patient WHERE username = $1", [username]);
+        if (patientResult.rows.length === 0) throw new Error("Patient not found");
+
+        const patientId = patientResult.rows[0].patient_id;
+        const client = await pool.connect();
+        try {
+            await client.query("BEGIN");
+            await client.query(
+                "UPDATE appointment SET status = $1 WHERE patient_id=$2 AND doctor_id=$3 AND date=$4",
+                [status, patientId, doctordata.doctor_id, appointmentdata.date]
+            );
+            await client.query("COMMIT");
+
+            // Redirect back to the dashboard with a success message
+            res.render("doctor_dashboard.ejs", { doctordata, appointmentstatus: "updated" });
+        } catch (error) {
+            await client.query("ROLLBACK");
+            console.error("Error in updating appointment status:", error);
+
+            // Redirect back to the dashboard with a failure message
+            res.render("doctor_dashboard.ejs", { doctordata, appointmentstatus: "failed" });
+        } finally {
+            client.release();
+        }
+    } catch (error) {
+        console.error("Error in finding patient ID while updating appointment:", error);
+        res.status(500).send("Internal Server Error");
+    }
+});
+
+
+// Add Medical Record Button Functionality
+app.post("/doctor/dashboard/appointments/medicalrecord", async (req, res) => {
+    const { doctordata, appointmentdata } = req.body;
+    res.render("add_medical_record_page.ejs", { doctordata, appointmentdata });
+});
+
+// Add Medical Records Functionality
+app.post("/doctor/dashboard/appointments/medicalrecord/add", async (req, res) => {
+    const { doctordata, username, diagnosis, prescription } = req.body;
+    try {
+        const patientResult = await pool.query("SELECT patient_id FROM patient WHERE username = $1", [username]);
+        if (patientResult.rows.length === 0) {
+            return res.render("invalid_patient_details_page.ejs", { doctordata });
+        }
+
+        const patientId = patientResult.rows[0].patient_id;
+        const client = await pool.connect();
+        try {
+            await client.query("BEGIN");
+            await client.query(
+                "INSERT INTO medicalrecords (patient_id, doctor_id, diagnosis, prescription) VALUES ($1, $2, $3, $4)",
+                [patientId, doctordata.doctor_id, diagnosis, prescription]
+            );
+            await client.query("COMMIT");
+            res.render("medical_record_added_page.ejs", { doctordata });
+        } catch (error) {
+            await client.query("ROLLBACK");
+            console.error("Error in adding medical records:", error);
+            res.render("medical_record_add_fail.ejs", { doctordata });
+        } finally {
+            client.release();
+        }
+    } catch (error) {
+        console.error("Error in finding patient ID while adding medical records:", error);
+        res.status(500).send("Internal Server Error");
+    }
+});
+
+// Go Back to Doctor Dashboard Button
+app.post("/doctor/dashboard", async (req, res) => {
+    const { doctordata } = req.body;
+    res.render("doctor_dashboard.ejs", { doctordata });
 });
 
 //admin add new user button functionality

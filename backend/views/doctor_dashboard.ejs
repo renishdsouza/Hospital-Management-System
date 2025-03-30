@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Doctor Dashboard</title>
+    <style>
+        .success-message {
+            background-color: #4CAF50;
+            color: white;
+            padding: 10px;
+            margin: 10px 0;
+            display: none;
+        }
+        .error-message {
+            background-color: #FF5733;
+            color: white;
+            padding: 10px;
+            margin: 10px 0;
+            display: none;
+        }
+    </style>
+    <script>
+        document.addEventListener("DOMContentLoaded", function() {
+            const successMessage = document.getElementById("success-message");
+            const errorMessage = document.getElementById("error-message");
+
+            if (successMessage) successMessage.style.display = "block";
+            if (errorMessage) errorMessage.style.display = "block";
+
+            setTimeout(() => {
+                if (successMessage) successMessage.style.display = "none";
+                if (errorMessage) errorMessage.style.display = "none";
+            }, 3000);
+        });
+    </script>
+</head>
+<body>
+    <%- include("header_logout.ejs") %>
+    <div class="container">
+        <h1>Welcome,<%= doctordata.name || "Doctor" %></h1>
+
+        <!-- Success Message -->
+        <% if (typeof appointmentstatus !== 'undefined') { %>
+            <% if (appointmentstatus === "updated") { %>
+                <div id="success-message" class="success-message">Appointment status updated successfully!</div>
+            <% } else if (appointmentstatus === "failed") { %>
+                <div id="error-message" class="error-message">Failed to update appointment status.</div>
+            <% } %>
+        <% } %>
+
+        <!-- View Appointments -->
+        <form action="/doctor/dashboard/appointments" method="post">
+            <input type="hidden" name="doctordata" value="<%= JSON.stringify(doctordata) %>">
+            <button type="submit">View Appointments</button>
+        </form>
+
+        <!-- Update Appointment Status -->
+        <form action="/doctor/dashboard/appointments/update" method="post">
+            <input type="hidden" name="doctordata" value="<%= JSON.stringify(doctordata) %>">
+            <button type="submit">Update Appointment Status</button>
+        </form>
+
+        <!-- Add Medical Records -->
+        <form action="/doctor/dashboard/appointments/medicalrecord" method="post">
+            <input type="hidden" name="doctordata" value="<%= JSON.stringify(doctordata) %>">
+            <button type="submit">Add Medical Records</button>
+        </form>
+    </div>
+</body>
+</html>

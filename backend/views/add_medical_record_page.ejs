@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Add Medical Record</title>
+</head>
+<body>
+    <h1>Add Medical Record</h1>
+
+    <% if (appointmentsData.length > 0) { %>
+        <!-- Form to Select Patient and Add Medical Record -->
+        <form action="/doctor/dashboard/appointments/medicalrecord/add" method="post">
+            <label for="patient_info">Select Patient:</label><br/>
+            <% appointmentsData.forEach((appointment) => { %>
+                <input type="radio" id="<%= appointment.patient_username %>" name="patient_id" value="<%= appointment.patient_id %>" required>
+                <label for="<%= appointment.patient_username %>">
+                    Name: <%= appointment.patient_name %>, DOB: <%= appointment.patient_dob %>, Username: <%= appointment.patient_username %>, Appointment ID: <%= appointment.appointment_id %>
+                </label><br/>
+                <!-- Hidden Appointment ID -->
+                <input type="hidden" name="appointment_id" value="<%= appointment.appointment_id %>">
+            <% }); %>
+
+            <!-- Diagnosis and Prescription -->
+            <label for="diagnosis">Diagnosis:</label><br/>
+            <textarea id="diagnosis" name="diagnosis" rows="4" cols="50"></textarea><br/>
+
+            <label for="prescription">Prescription:</label><br/>
+            <textarea id="prescription" name="prescription" rows="4" cols="50"></textarea><br/>
+
+            <!-- Hidden Doctor Data -->
+            <input type="hidden" name="doctordata" value="<%= JSON.stringify(doctordata) %>">
+
+            <!-- Submit Button -->
+            <button type="submit">Add Medical Record</button>
+        </form>
+
+    <% } else { %>
+        <!-- No Appointments Found -->
+        <p>No appointments found for the selected date.</p>
+
+        <!-- Go Back to Date Selection -->
+        <form action="/doctor/dashboard/appointments/medicalrecord" method="post">
+            <input type="hidden" name="doctordata" value="<%= JSON.stringify(doctordata) %>">
+            <button type="submit">Choose Another Date</button>
+        </form>
+    <% } %>
+
+    <!-- Go Back to Dashboard -->
+    <form action="/doctor/dashboard" method="post">
+        <input type="hidden" name="doctordata" value="<%= JSON.stringify(doctordata) %>">
+        <button type="submit">Go Back to Dashboard</button>
+    </form>
+</body>
+</html>
