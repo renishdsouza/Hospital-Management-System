@@ -35,7 +35,68 @@ app.get('/', async (req, res) => {
 });
 //on all dashboard add a logout button
 // Login Route
- 
+app.post("/login/submit", async (req, res) => {
+    const { username, password, role } = req.body;
+
+    try {
+        const result = await pool.query(
+            'SELECT * FROM "user" WHERE username = $1 AND password = $2 AND role = $3',
+            [username, password, role]
+        );
+
+        if (result.rows.length === 0) {
+            return res.render("login.ejs", { status: "false" });
+        }
+
+        const user_id = result.rows[0].user_id;
+
+        let query = "";
+        let roleData = {};
+        let dashboardView = "";
+
+        if (role === "patient") {
+            query = 'SELECT * FROM "patient" WHERE user_id=$1';
+            dashboardView = "patient_dashboard.ejs";
+        } else if (role === "doctor") {
+            query = 'SELECT * FROM "doctor" WHERE user_id=$1';
+            dashboardView = "doctor_dashboard.ejs";
+        } else if (role === "admin") {
+            query = 'SELECT * FROM "admin" WHERE user_id=$1';
+            dashboardView = "admin_dashboard.ejs";
+        } else if (role === "receptionist") {
+            query = 'SELECT * FROM "receptionist" WHERE user_id=$1';
+            dashboardView = "reception_dashboard.ejs";
+        } else {
+            return res.status(400).send("Invalid role selected.");
+        }
+
+        const roleResult = await pool.query(query, [user_id]);
+
+        if (roleResult.rows.length === 0) {
+            console.log(`User entry exists but ${role} table entry is missing`);
+            return res.status(404).send(`${role} data not found`);
+        }
+
+        roleData = roleResult.rows[0];
+
+        // ✅ Ensure correct variable names are passed based on role
+        if (role === "patient") {
+            return res.render(dashboardView, {
+                patientdata: roleData
+            });
+        } else if (role === "doctor") {
+            return res.render(dashboardView, { doctordata: roleData });
+        } else if (role === "admin") {
+            return res.render(dashboardView, { admindata: roleData });
+        } else if (role === "receptionist") {
+            return res.render(dashboardView, { receptionistdata: roleData });
+        }
+
+    } catch (err) {
+        console.error("Error during login:", err);
+        res.status(500).send("Server error");
+    }
+});
 
 //reception new patient register button action
 // Reception New Patient Register Button Action
@@ -57,7 +118,7 @@ app.post("/reception/newpatienregister", async (req, res) => {
 // New Patient Registration Page Action
 app.post("/new/patient/register/submit", async (req, res) => {
     let { receptionistdata, username, password, name, dob, gender, phone, email, address, bloodgroup, medical_history } = req.body;
-
+    console.log("New patient dob:",dob);
     try {
         // Parse receptionistdata if it's a JSON string
         receptionistdata = typeof receptionistdata === "string" ? JSON.parse(receptionistdata) : receptionistdata;
@@ -120,7 +181,7 @@ app.post("/appoinment/reception/schedule", (req, res) => {
 //appoinment schedule receptionnist stage1
 app.post("/new/appoinment/schedule/reception/stage1", async (req, res) => {
     let { receptionistdata, dob, username } = req.body;
-
+    console.log("Patient dob for appointmetn scheduling:",dob);
     // Ensure receptionistdata is already an object
     try {
         receptionistdata = typeof receptionistdata === "string" ? JSON.parse(receptionistdata) : receptionistdata;
@@ -248,28 +309,17 @@ app.post("/new/appointment/schedule/reception/stage3/specialization", async (req
 //after choosing doctor date and time the second will have this within the same page
 app.post("/add/appointment", async (req, res) => {
     let { patientdata, receptionistdata, selected_doctor_name, chosen_specialization, date, time } = req.body;
-    console.log(receptionistdata);
-    // Safely parse JSON strings if necessary
+
     try {
+        // Parse JSON strings if necessary
         patientdata = typeof patientdata === "string" ? JSON.parse(patientdata) : patientdata;
         receptionistdata = typeof receptionistdata === "string" ? JSON.parse(receptionistdata) : receptionistdata;
-    } catch (error) {
-        console.error("Error parsing data:", error);
-        // Fallback to empty objects if parsing fails
-        patientdata = {};
-        receptionistdata = {};
-    }
 
-    // Validate that patient_id exists
-    if (!patientdata.patient_id) {
-        console.error("Error: patient_id is missing in patientdata");
-        return res.redirect("/new/appointment/reception/failed");
-    }
+        console.log("Received date:", date); // Debugging
 
-    console.log("Specialization:", chosen_specialization); // Debugging log
-    console.log("Selected Doctor Name:", selected_doctor_name); // Debugging log
+        // Ensure date is formatted correctly
+        const formattedDate = new Date(date).toISOString().split("T")[0]; // Convert to YYYY-MM-DD
 
-    try {
         const doctorqueryresult = await pool.query(
             "SELECT * FROM doctor WHERE specialization=$1 AND name=$2",
             [chosen_specialization, selected_doctor_name]
@@ -281,8 +331,8 @@ app.post("/add/appointment", async (req, res) => {
             try {
                 await client.query("BEGIN");
                 const appointmentInsertQuery =
-                    "INSERT INTO appointment (doctor_id, patient_id, date, time) VALUES ($1, $2, $3, $4)";
-                await client.query(appointmentInsertQuery, [doctorid, patientdata.patient_id, date, time]);
+                    "INSERT INTO appointment (doctor_id, patient_id, date, time) VALUES ($1, $2, $3::DATE, $4::TIME)";
+                await client.query(appointmentInsertQuery, [doctorid, patientdata.patient_id, formattedDate, time]);
                 await client.query("COMMIT");
                 res.render("success_appointment_schedule_reception.ejs", { receptionistdata });
             } catch (error) {
@@ -363,7 +413,7 @@ app.get("/reception/dashboard", async (req, res) => {
 // in patients page view appointments
 app.post("/patient/appointment", async (req, res) => {
     let patientdata;
-    
+
     try {
         patientdata = JSON.parse(req.body.patientdata); // Parse JSON string
     } catch (error) {
@@ -377,34 +427,28 @@ app.post("/patient/appointment", async (req, res) => {
 
     try {
         let patientAppointmentsResult = await pool.query(
-            "SELECT a.appointment_id, a.date, a.time, a.status, d.name AS doctor_name, d.specialization " +
+            "SELECT a.appointment_id, TO_CHAR(a.date::DATE, 'YYYY-MM-DD') AS appointment_date, a.time::TIME AS appointment_time, a.status, d.name AS doctor_name, d.specialization " +
             "FROM appointment a JOIN doctor d ON a.doctor_id = d.doctor_id " +
             "WHERE a.patient_id = $1 ORDER BY a.date DESC",
             [patientdata.patient_id]
         );
 
-        const appointments = patientAppointmentsResult.rows; // Store result in a variable
+        const appointments = patientAppointmentsResult.rows;
+        console.log(appointments);
 
-        // Return JSON if requested
-        if (req.headers.accept === "application/json") {
-            return res.json({ 
-                patientdata, 
-                appointments
-            });
-        }
-
-        // Render the view with a flag if no appointments exist
         res.render("patient_view_appointment_page.ejs", {
             patientdata,
-            appointments, // Pass array directly
-            noAppointments: appointments.length === 0 // Flag for no appointments
+            appointments,
+            noAppointments: appointments.length === 0,
         });
-
     } catch (err) {
         console.error("Error in patient view appointment page", err);
         res.status(500).json({ error: "Server error" });
     }
 });
+
+
+
 
 
 // in patients page add another option to view all medical records
@@ -444,6 +488,9 @@ app.post("/patients/medical/records", async (req, res) => {
 
 
 
+
+
+
 // go back to dashboard patient
 app.post("/patients/dashboard", (req, res) => {
     try {
@@ -459,26 +506,48 @@ app.post("/patients/dashboard", (req, res) => {
 
 
 //doctor dashboard view appointments button
+
 // Doctor Dashboard View Appointments Button
 app.post("/doctor/dashboard/appointments", async (req, res) => {
-    const { doctordata } = req.body;
-    res.render("doctor_appointment_view_date_selector.ejs", { doctordata });
+    let { doctordata } = req.body;
+    try {
+        doctordata = typeof doctordata === "string" ? JSON.parse(doctordata) : doctordata;
+        res.render("doctor_appointment_view_date_selector.ejs", { doctordata });
+    } catch (error) {
+        console.error("Error parsing doctordata:", error);
+        res.status(400).send("Invalid data format");
+    }
 });
 
 // Allow option to choose a date and display appointments
 app.post("/doctor/dashboard/appointments/date", async (req, res) => {
-    const { doctordata, date } = req.body;
+    let { doctordata, date } = req.body;
+
     try {
+        // Parse stringified doctordata
+        doctordata = typeof doctordata === "string" ? JSON.parse(doctordata) : doctordata;
+
+        console.log("Parsed doctordata:", doctordata); // Debugging
+        console.log("Selected date:", date); // Debugging
+
+        // Ensure date is formatted correctly
+        const formattedDate = new Date(date).toISOString().split("T")[0]; // Convert to YYYY-MM-DD
+
         const doctorAppointmentsResult = await pool.query(
-            "SELECT appointment.*, patient.username AS patient_username FROM appointment JOIN patient ON appointment.patient_id = patient.patient_id WHERE appointment.doctor_id = $1 AND appointment.date = $2",
-            [doctordata.doctor_id, date]
+            "SELECT appointment.*, TO_CHAR(appointment.date, 'YYYY-MM-DD') AS appointment_date, TO_CHAR(appointment.time, 'HH24:MI') AS appointment_time, " +
+            "patient.patient_id, patient.name AS patient_name, patient.dob AS patient_dob " +
+            "FROM appointment " +
+            "JOIN patient ON appointment.patient_id = patient.patient_id " +
+            "WHERE appointment.doctor_id = $1 AND appointment.date = $2",
+            [doctordata.doctor_id, formattedDate]
         );
 
-        // Render the same EJS file regardless of whether appointments exist or not
+        console.log("Query result:", doctorAppointmentsResult.rows); // Debugging
+
         res.render("doctor_display_appointments.ejs", {
             doctordata,
             appointmentsData: doctorAppointmentsResult.rows,
-            date,
+            date: formattedDate,
         });
     } catch (error) {
         console.error("Error in doctor view appointments page:", error);
@@ -486,34 +555,89 @@ app.post("/doctor/dashboard/appointments/date", async (req, res) => {
     }
 });
 
-
-// Update Appointment Details of the Day Button Functionality
+// Direct Button from Doctor Dashboard to Choose a Date for Updating Appointment Status
 app.post("/doctor/dashboard/appointments/update", async (req, res) => {
-    const { doctordata, appointmentdata } = req.body;
-    res.render("appointment_status_update.ejs", { doctordata, appointmentdata });
+    let { doctordata } = req.body;
+    try {
+        doctordata = typeof doctordata === "string" ? JSON.parse(doctordata) : doctordata;
+        res.render("update_appointment_date_selector.ejs", { doctordata });
+    } catch (error) {
+        console.error("Error parsing doctordata:", error);
+        res.status(400).send("Invalid data format");
+    }
 });
+
+// After Choosing a Date, Display Appointments for that Date to Update Status
+app.post("/doctor/dashboard/appointments/update/date", async (req, res) => {
+    let { doctordata, date } = req.body; // Use let for variables that may be reassigned
+
+    try {
+        // Parse doctordata if it's a string
+        doctordata = typeof doctordata === "string" ? JSON.parse(doctordata) : doctordata;
+
+        const doctorAppointmentsResult = await pool.query(
+            `SELECT appointment.*, 
+                    patient.name AS patient_name, 
+                    patient.dob AS patient_dob, 
+                    "user".username AS patient_username 
+             FROM appointment 
+             JOIN patient ON appointment.patient_id = patient.patient_id 
+             JOIN "user" ON patient.user_id = "user".user_id 
+             WHERE appointment.doctor_id = $1 AND appointment.date = $2`,
+            [doctordata.doctor_id, date]
+        );
+
+        // Render the page with fetched appointments
+        res.render("appointment_status_update.ejs", {
+            doctordata,
+            appointmentdata: doctorAppointmentsResult.rows,
+            date,
+        });
+    } catch (error) {
+        console.error("Error in fetching appointments for updating status:", error);
+        res.status(500).send("Internal Server Error");
+    }
+});
+
 
 // Update Appointment Status Page
 app.post("/doctor/dashboard/appointments/update/status", async (req, res) => {
-    const { doctordata, appointmentdata, username, status } = req.body;
+    let { doctordata, date, patient_username, status } = req.body;
+
     try {
-        const patientResult = await pool.query("SELECT patient_id FROM patient WHERE username = $1", [username]);
+        // Parse doctordata if necessary
+        doctordata = typeof doctordata === "string" ? JSON.parse(doctordata) : doctordata;
+
+        // Fetch patient ID using username
+        const patientResult = await pool.query(
+            'SELECT patient_id FROM "user" JOIN patient ON "user".user_id = patient.user_id WHERE username = $1',
+            [patient_username]
+        );
+
         if (patientResult.rows.length === 0) throw new Error("Patient not found");
 
         const patientId = patientResult.rows[0].patient_id;
+
         const client = await pool.connect();
+
         try {
             await client.query("BEGIN");
-            await client.query(
-                "UPDATE appointment SET status = $1 WHERE patient_id=$2 AND doctor_id=$3 AND date=$4",
-                [status, patientId, doctordata.doctor_id, appointmentdata.date]
-            );
+
+            // Update appointment status
+            const updateQuery = `
+                UPDATE appointment 
+                SET status = $1 
+                WHERE patient_id = $2 AND doctor_id = $3 AND date = $4
+            `;
+            await client.query(updateQuery, [status, patientId, doctordata.doctor_id, date]);
+
             await client.query("COMMIT");
 
             // Redirect back to the dashboard with a success message
             res.render("doctor_dashboard.ejs", { doctordata, appointmentstatus: "updated" });
         } catch (error) {
             await client.query("ROLLBACK");
+
             console.error("Error in updating appointment status:", error);
 
             // Redirect back to the dashboard with a failure message
@@ -528,49 +652,118 @@ app.post("/doctor/dashboard/appointments/update/status", async (req, res) => {
 });
 
 
+
 // Add Medical Record Button Functionality
 app.post("/doctor/dashboard/appointments/medicalrecord", async (req, res) => {
-    const { doctordata, appointmentdata } = req.body;
-    res.render("add_medical_record_page.ejs", { doctordata, appointmentdata });
+    let { doctordata } = req.body;
+
+    try {
+        doctordata = typeof doctordata === "string" ? JSON.parse(doctordata) : doctordata;
+        console.log("Post button press parsed:",doctordata);
+        res.render("date_choose_medical_record.ejs", { doctordata });
+    } catch (error) {
+        console.error("Error parsing doctordata:", error);
+        res.status(400).send("Invalid data format");
+    }
 });
+
+//appointment fetcher for medical records after choosing date
+app.post("/doctor/dashboard/appointments/date/medicalrecord", async (req, res) => {
+    let { doctordata, date } = req.body;
+
+    try {
+        // Parse doctordata if necessary
+        doctordata = typeof doctordata === "string" ? JSON.parse(doctordata) : doctordata;
+        console.log("Pre appointment fetch:",doctordata);
+        console.log("chosendate:",date);
+        // Query to fetch appointments for the selected date
+        const doctorAppointmentsResult = await pool.query(
+            `SELECT appointment.appointment_id, 
+                    TO_CHAR(appointment.date, 'YYYY-MM-DD') AS appointment_date,
+                    TO_CHAR(appointment.time, 'HH24:MI') AS appointment_time,
+                    patient.patient_id,
+                    patient.name AS patient_name,
+                    patient.dob AS patient_dob,
+                    "user".username AS patient_username,
+                    appointment.status
+             FROM appointment
+             JOIN patient ON appointment.patient_id = patient.patient_id
+             JOIN "user" ON patient.user_id = "user".user_id
+             WHERE appointment.doctor_id = $1 AND appointment.date = $2`,
+            [doctordata.doctor_id, date]
+        );
+
+        // Render the page with appointments data
+        res.render("add_medical_record_page.ejs", {
+            doctordata,
+            appointmentsData: doctorAppointmentsResult.rows,
+            date,
+        });
+    } catch (error) {
+        console.error("Error fetching appointments:", error);
+        res.status(500).send("Internal Server Error");
+    }
+});
+
+
 
 // Add Medical Records Functionality
 app.post("/doctor/dashboard/appointments/medicalrecord/add", async (req, res) => {
-    const { doctordata, username, diagnosis, prescription } = req.body;
+    let { doctordata, patient_id, diagnosis, prescription, appointment_id } = req.body;
+        doctordata=JSON.parse(doctordata);
+        console.log("doctordata pre insertion:",doctordata);
     try {
-        const patientResult = await pool.query("SELECT patient_id FROM patient WHERE username = $1", [username]);
-        if (patientResult.rows.length === 0) {
-            return res.render("invalid_patient_details_page.ejs", { doctordata });
-        }
-
-        const patientId = patientResult.rows[0].patient_id;
+        
         const client = await pool.connect();
+
         try {
             await client.query("BEGIN");
+
+            // Insert medical record into the database
             await client.query(
-                "INSERT INTO medicalrecords (patient_id, doctor_id, diagnosis, prescription) VALUES ($1, $2, $3, $4)",
-                [patientId, doctordata.doctor_id, diagnosis, prescription]
+                `INSERT INTO medicalrecords (patient_id, doctor_id, diagnosis, prescription, appointment_id)
+                 VALUES ($1, $2, $3, $4, $5)`,
+                [patient_id, doctordata.doctor_id, diagnosis || null, prescription || null, appointment_id]
             );
+
             await client.query("COMMIT");
+
             res.render("medical_record_added_page.ejs", { doctordata });
         } catch (error) {
             await client.query("ROLLBACK");
-            console.error("Error in adding medical records:", error);
+            console.error("Error adding medical record:", error);
             res.render("medical_record_add_fail.ejs", { doctordata });
         } finally {
             client.release();
         }
     } catch (error) {
-        console.error("Error in finding patient ID while adding medical records:", error);
+        console.error("Error adding medical record:", error);
         res.status(500).send("Internal Server Error");
     }
 });
 
+
+
 // Go Back to Doctor Dashboard Button
 app.post("/doctor/dashboard", async (req, res) => {
-    const { doctordata } = req.body;
-    res.render("doctor_dashboard.ejs", { doctordata });
+    let { doctordata } = req.body;
+
+    try {
+        // Parse doctordata if necessary
+        doctordata = typeof doctordata === "string" ? JSON.parse(doctordata) : doctordata;
+
+        res.render("doctor_dashboard.ejs", { doctordata });
+    } catch (error) {
+        console.error("Error loading doctor dashboard:", error);
+        res.status(400).send("Invalid data format");
+    }
 });
+
+
+
+
+
+
 
 //admin add new user button functionality
 app.post("/admin/dashboard/users/add",async (req,res)=>{
