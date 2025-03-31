@@ -3,22 +3,67 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Medical Record Addition Failed</title>
+    <title>Medical Record Addition Failed | Hospital Management System</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f4f4f4;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+        }
+        .container {
+            background-color: #ffffff;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+            width: 100%;
+            max-width: 600px;
+            text-align: center;
+        }
+        h1 {
+            color: #e74c3c; /* Red for failure message */
+            margin-bottom: 20px;
+        }
+        p {
+            color: #34495e; /* Dark gray for text */
+            font-size: 16px;
+        }
+        button {
+            background-color: #3498db; /* Blue for buttons */
+            color: white;
+            border: none;
+            padding: 12px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            margin-top: 20px;
+        }
+        button:hover {
+            background-color: #2980b9; /* Darker blue on hover */
+        }
+    </style>
 </head>
 <body>
-    <h1>Failed to Add Medical Record!</h1>
-    <p>An error occurred while adding the medical record. Please try again later.</p>
+    <div class="container">
+        <!-- Error Message -->
+        <h1>Failed to Add Medical Record!</h1>
+        <p>An error occurred while adding the medical record. Please try again later.</p>
 
-    <!-- Go Back to Add Medical Record Page -->
-    <form action="/doctor/dashboard/appointments/medicalrecord" method="post">
-        <input type="hidden" name="doctordata" value="<%= JSON.stringify(doctordata) %>">
-        <button type="submit">Try Again</button>
-    </form>
+        <!-- Go Back to Add Medical Record Page -->
+        <form action="/doctor/dashboard/appointments/medicalrecord" method="post">
+            <input type="hidden" name="doctordata" value="<%= JSON.stringify(doctordata) %>">
+            <button type="submit">Try Again</button>
+        </form>
 
-    <!-- Go Back to Dashboard -->
-    <form action="/doctor/dashboard" method="post">
-        <input type="hidden" name="doctordata" value="<%= JSON.stringify(doctordata) %>">
-        <button type="submit">Go Back to Dashboard</button>
-    </form>
+        <!-- Go Back to Dashboard -->
+        <form action="/doctor/dashboard" method="post">
+            <input type="hidden" name="doctordata" value="<%= JSON.stringify(doctordata) %>">
+            <button type="submit">Go Back to Dashboard</button>
+        </form>
+    </div>
 </body>
 </html>

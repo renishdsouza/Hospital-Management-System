@@ -3,28 +3,70 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>RECEPTIONIST Dashboard</title>
+    <title>Receptionist Dashboard | Hospital Management System</title>
     <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f4f4f4;
+            margin: 0;
+            padding: 0;
+        }
+        .container {
+            max-width: 800px;
+            margin: 30px auto;
+            background-color: #ffffff;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+        }
+        h1 {
+            color: #2c3e50;
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        h2 {
+            color: #34495e;
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        button {
+            background-color: #3498db; /* Blue for buttons */
+            color: white;
+            border: none;
+            padding: 12px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            margin-top: 20px;
+            display: block; /* Full-width buttons */
+            width: 100%;
+        }
+        button:hover {
+            background-color: #2980b9; /* Darker blue on hover */
+        }
         .success-message {
-            background-color: #4CAF50;
+            background-color: #4CAF50; /* Green for success */
             color: white;
             padding: 10px;
-            margin: 10px 0;
-            display: none;
+            margin-bottom: 15px;
+            text-align: center;
+            border-radius: 5px;
         }
         .error-message {
-            background-color: #FF5733;
+            background-color: #FF5733; /* Red for error */
             color: white;
             padding: 10px;
-            margin: 10px 0;
-            display: none;
+            margin-bottom: 15px;
+            text-align: center;
+            border-radius: 5px;
         }
         .not-found-message {
-            background-color: #FFC107;
+            background-color: #FFC107; /* Yellow for not found */
             color: black;
             padding: 10px;
-            margin: 10px 0;
-            display: none;
+            margin-bottom: 15px;
+            text-align: center;
+            border-radius: 5px;
         }
     </style>
     <script>
@@ -33,61 +75,57 @@
             const errorMessage = document.getElementById("error-message");
             const notFoundMessage = document.getElementById("not-found-message");
 
-            if (successMessage) {
-                successMessage.style.display = "block";
-                setTimeout(() => {
-                    successMessage.style.display = "none";
-                }, 3000);
-            }
-            if (errorMessage) {
-                errorMessage.style.display = "block";
-                setTimeout(() => {
-                    errorMessage.style.display = "none";
-                }, 3000);
-            }
-            if (notFoundMessage) {
-                notFoundMessage.style.display = "block";
-                setTimeout(() => {
-                    notFoundMessage.style.display = "none";
-                }, 3000);
-            }
+            if (successMessage) successMessage.style.display = "block";
+            if (errorMessage) errorMessage.style.display = "block";
+            if (notFoundMessage) notFoundMessage.style.display = "block";
+
+            setTimeout(() => {
+                if (successMessage) successMessage.style.display = "none";
+                if (errorMessage) errorMessage.style.display = "none";
+                if (notFoundMessage) notFoundMessage.style.display = "none";
+            }, 3000);
         });
     </script>
 </head>
 <body>
     <%- include("header_logout.ejs") %>
+
     <div class="container">
-        <h1 class="header">HMS</h1>
+        <h1>Hospital Management System</h1>
+        
         <div class="content">
-            <h2>Welcome, <%= receptionistdata.name ? receptionistdata.name : "RECEPTIONIST" %></h2>
+            
+          <h2>Welcome, <%= receptionistdata.name ? receptionistdata.name : "Receptionist" %></h2>
 
-            <!-- Success Message -->
-            <% if (typeof newpatientregisterstatus !== 'undefined') { %>
-                <% if (newpatientregisterstatus === "true") { %>
-                    <div id="success-message" class="success-message">Patient registered successfully!</div>
-                <% } else if (newpatientregisterstatus === "false") { %>
-                    <div id="error-message" class="error-message">Patient registration failed. Please try again.</div>
-                <% } %>
-            <% } %>
+          <!-- Success Message -->
+          <% if (typeof newpatientregisterstatus !== 'undefined') { %>
+              <% if (newpatientregisterstatus === "true") { %>
+                  <div id="success-message" class="success-message">Patient registered successfully!</div>
+              <% } else if (newpatientregisterstatus === "false") { %>
+                  <div id="error-message" class="error-message">Patient registration failed. Please try again.</div>
+              <% } %>
+          <% } %>
 
-            <!-- Patient Not Found Message -->
-            <% if (typeof patientfound !== 'undefined' && patientfound === "false") { %>
-                <div id="not-found-message" class="not-found-message">Patient not found. Please check details.</div>
-            <% } %>
+          <!-- Patient Not Found Message -->
+          <% if (typeof patientfound !== 'undefined' && patientfound === "false") { %>
+              <div id="not-found-message" class="not-found-message">Patient not found. Please check details.</div>
+          <% } %>
 
-            <!-- Register New Patient Form -->
-            <form action="/reception/newpatienregister" method="post">
-                <input type="hidden" name="receptionistdata" value="<%= JSON.stringify(receptionistdata) %>">
-                <button type="submit">Register New Patient</button>
-            </form>
+          <!-- Register New Patient Form -->
+          <form action="/reception/newpatienregister" method="post">
+              <input type="hidden" name="receptionistdata" value="<%= JSON.stringify(receptionistdata) %>">
+              <button type="submit">Register New Patient</button>
+          </form>
 
-            <!-- Schedule Appointment Form -->
-            <form action="/appoinment/reception/schedule" method="post">
-                <input type="hidden" name="receptionistdata" value="<%= JSON.stringify(receptionistdata) %>">
-                <button type="submit">Schedule Appointment</button>
-            </form>
+          <!-- Schedule Appointment Form -->
+          <form action="/appoinment/reception/schedule" method="post">
+              <input type="hidden" name="receptionistdata" value="<%= JSON.stringify(receptionistdata) %>">
+              <button type="submit">Schedule Appointment</button>
+          </form>
+
         </div>
     </div>
+
     <%- include("footer.ejs") %>
 </body>
 </html>

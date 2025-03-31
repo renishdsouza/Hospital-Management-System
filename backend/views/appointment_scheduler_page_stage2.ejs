@@ -3,20 +3,70 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Appointment Scheduling - Stage 2</title>
+    <title>Appointment Scheduling - Stage 2 | Hospital Management System</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f4f4f4;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+        }
+        .container {
+            background-color: #ffffff;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+            width: 100%;
+            max-width: 500px;
+        }
+        h3 {
+            color: #2c3e50;
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        p {
+            color: #34495e; /* Dark gray for text */
+            font-size: 16px;
+            margin-bottom: 10px;
+        }
+        button {
+            background-color: #3498db; /* Blue for buttons */
+            color: white;
+            border: none;
+            padding: 12px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            margin-top: 20px;
+            display: block; /* Center the button */
+            width: 100%; /* Full-width button */
+        }
+        button:hover {
+            background-color: #2980b9; /* Darker blue on hover */
+        }
+    </style>
 </head>
 <body>
-    <form action="/new/appointment/schedule/reception/stage2/confirm" method="post">
-        <input type="hidden" name="patientdetails" value='<%= JSON.stringify(patientdetails || {}) %>'>
-        <input type="hidden" name="receptionistdata" value='<%= JSON.stringify(receptionistdata || {}) %>'>
-    
-        <h3>Patient Details</h3>
-        <p>Name: <%= patientdetails.name %></p>
-        <p>Age: <%= patientdetails.age %></p>
-    
-        <button type="submit">Confirm Patient Details</button>
-    </form>
-    
-    
+    <div class="container">
+        <form action="/new/appointment/schedule/reception/stage2/confirm" method="post">
+            
+            <!-- Hidden Inputs -->
+            <input type="hidden" name="patientdetails" value='<%= JSON.stringify(patientdetails || {}) %>'>
+            <input type="hidden" name="receptionistdata" value='<%= JSON.stringify(receptionistdata || {}) %>'>
+        
+            <!-- Patient Details -->
+            <h3>Patient Details</h3>
+            
+            <p><strong>Name:</strong> <%= patientdetails.name %></p>
+            <p><strong>Age:</strong> <%= patientdetails.age %></p>
+        
+            <!-- Confirm Button -->
+            <button type="submit">Confirm Patient Details</button>
+        </form>
+    </div>
 </body>
 </html>

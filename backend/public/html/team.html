@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Group 14 - Team</title>
+    <style>
+        /* General Styling */
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #3498db, #2ecc71); /* Gradient background */
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+        }
+
+        /* Container Styling */
+        .container {
+            background-color: white;
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
+            text-align: center;
+            width: 90%;
+            max-width: 400px;
+            animation: fadeIn 1s ease-in-out; /* Add fade-in animation */
+        }
+
+        /* Heading Styling */
+        h1 {
+            color: #2c3e50; /* Dark gray */
+            font-size: 28px;
+            margin-bottom: 20px;
+        }
+
+        /* List Styling */
+        ul {
+            list-style: none;
+            padding: 0;
+        }
+
+        li {
+            background-color: #3498db; /* Blue for team members */
+            color: white;
+            padding: 15px;
+            margin: 10px 0;
+            border-radius: 10px;
+            font-size: 18px;
+            font-weight: bold;
+            transition: transform 0.3s ease, box-shadow 0.3s ease; /* Smooth hover effect */
+        }
+
+        li:hover {
+            transform: translateY(-5px); /* Lift the item on hover */
+            box-shadow: 0 6px 15px rgba(0, 0, 0, 0.2); /* Add shadow on hover */
+        }
+
+        a {
+            color: white; /* Keep links white to blend with the list item */
+            text-decoration: none; /* Remove underline from links */
+        }
+
+        a:hover {
+            text-decoration: underline; /* Add underline on hover for links */
+        }
+
+        .github-link a {
+            display: inline-block;
+            margin-top: 15px;
+            background-color: #2ecc71; /* Green for GitHub link */
+            color: white;
+            padding: 10px 20px;
+            border-radius: 5px;
+            font-weight: bold;
+            text-decoration: none;
+            transition: background-color 0.3s ease, transform 0.3s ease; /* Smooth hover effect */
+        }
+
+        .github-link a:hover {
+            background-color: #27ae60; /* Darker green on hover */
+            transform: translateY(-3px); /* Lift the button on hover */
+        }
+
+        footer {
+            margin-top: 20px;
+            font-size: 14px;
+            color: white; /* White footer text for contrast against gradient background */
+        }
+
+        /* Animation for Fade-In Effect */
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: scale(0.9);
+            }
+            to {
+                opacity: 1;
+                transform: scale(1);
+            }
+        }
+
+        /* Responsive Design */
+        @media (max-width: 480px) {
+            h1 {
+                font-size: 24px; /* Smaller heading for mobile devices */
+                margin-bottom: 15px;
+            }
+            
+            li {
+                font-size: 16px; /* Smaller text for mobile devices */
+                padding: 12px; 
+                margin-bottom: 8px;
+                border-radius: 8px; 
+            }
+            
+            footer {
+                font-size: 12px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Group 14 - Team</h1>
+        <ul>
+            <li><a href="https://www.linkedin.com/in/soneesh-gannamaneni-350625330/" target="_blank">Gannamaneni Soneesh</a></li>
+            <li><a href="https://www.linkedin.com/in/manorath-kuruva-0b4a7a1b0/" target="_blank">Kuruva Manorath</a></li>
+            <li><a href="https://www.linkedin.com/in/renish-dsouza-356a56291/" target="_blank">Renish D'souza</a></li>
+        </ul>
+        <div class="github-link">
+            <a href="https://github.com/manorath2311/Hospital_Management_System" target="_blank">GitHub Repository</a>
+        </div>
+    </div>
+    <footer>
+        &copy; CS2011E DBMS (NIT CALICUT) - Group 14.
+    </footer>
+</body>
+</html>

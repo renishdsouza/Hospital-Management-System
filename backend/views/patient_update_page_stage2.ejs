@@ -3,14 +3,59 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Update Patient Details</title>
+    <title>Update Patient Details | Hospital Management System</title>
     <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f4f4f4;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+        }
+        .container {
+            background-color: #ffffff;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+            width: 100%;
+            max-width: 500px;
+        }
+        h1 {
+            color: #2c3e50;
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        .checkbox-group {
+            display: flex;
+            align-items: center;
+            margin-top: 10px; /* Space between checkboxes */
+        }
+        input[type="checkbox"] {
+            margin-right: 10px; /* Space between checkbox and label */
+        }
+        button {
+            background-color: #3498db; /* Blue for buttons */
+            color: white;
+            border: none;
+            padding: 12px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            margin-top: 20px;
+        }
+        button:hover {
+            background-color: #2980b9; /* Darker blue on hover */
+        }
         .error-message {
-            background-color: #FF5733;
+            background-color: #FF5733; /* Red for error */
             color: white;
             padding: 10px;
-            margin: 10px 0;
-            display: none;
+            margin-bottom: 15px;
+            text-align: center;
+            border-radius: 5px;
         }
     </style>
     <script>
@@ -26,59 +71,80 @@
     </script>
 </head>
 <body>
-    <h1>Update Patient Details</h1>
+    <div class="container">
+        <h1>Update Patient Details</h1>
 
-    <!-- Error Message -->
-    <% if (typeof nofieldchosend !== 'undefined' && nofieldchosend === "false") { %>
-        <div id="error-message" class="error-message">No fields selected for update. Please choose at least one field.</div>
-    <% } %>
+        <!-- Error Message -->
+        <% if (typeof nofieldchosend !== 'undefined' && nofieldchosend === "false") { %>
+          <div id="error-message" class="error-message">No fields selected for update. Please choose at least one field.</div>
+        <% } %>
 
-    <!-- Form to Select Fields to Update -->
-    <form action="/admin/update/stage2/patient" method="post">
-        <p>Select the fields you want to update:</p>
+        <!-- Form to Select Fields to Update -->
+        <form action="/admin/update/stage2/patient" method="post">
+            
+          <p>Select the fields you want to update:</p>
 
-        <input type="checkbox" id="name" name="updatefield" value="name">
-        <label for="name">Name</label><br/>
+          <!-- Checkboxes for Fields -->
+          <div class="checkbox-group">
+              <input type="checkbox" id="name" name="updatefield" value="name">
+              <label for="name">Name</label>
+          </div>
 
-        <input type="checkbox" id="dob" name="updatefield" value="dob">
-        <label for="dob">Date of Birth</label><br/>
+          <div class="checkbox-group">
+              <input type="checkbox" id="dob" name="updatefield" value="dob">
+              <label for="dob">Date of Birth</label>
+          </div>
 
-        <input type="checkbox" id="gender" name="updatefield" value="gender">
-        <label for="gender">Gender</label><br/>
+          <div class="checkbox-group">
+              <input type="checkbox" id="gender" name="updatefield" value="gender">
+              <label for="gender">Gender</label>
+          </div>
 
-        <input type="checkbox" id="phone" name="updatefield" value="phone">
-        <label for="phone">Phone</label><br/>
+          <div class="checkbox-group">
+              <input type="checkbox" id="phone" name="updatefield" value="phone">
+              <label for="phone">Phone</label>
+          </div>
 
-        <input type="checkbox" id="email" name="updatefield" value="email">
-        <label for="email">Email</label><br/>
+          <div class="checkbox-group">
+              <input type="checkbox" id="email" name="updatefield" value="email">
+              <label for="email">Email</label>
+          </div>
 
-        <input type="checkbox" id="address" name="updatefield" value="address">
-        <label for="address">Address</label><br/>
+          <div class="checkbox-group">
+              <input type="checkbox" id="address" name="updatefield" value="address">
+              <label for="address">Address</label>
+          </div>
 
-        <input type="checkbox" id="blood_group" name="updatefield" value="blood_group">
-        <label for="blood_group">Blood Group</label><br/>
+          <div class="checkbox-group">
+              <input type="checkbox" id="blood_group" name="updatefield" value="blood_group">
+              <label for="blood_group">Blood Group</label>
+          </div>
 
-        <input type="checkbox" id="medical_history" name="updatefield" value="medical_history">
-        <label for="medical_history">Medical History</label><br/>
+          <div class="checkbox-group">
+              <input type="checkbox" id="medical_history" name="updatefield" value="medical_history">
+              <label for="medical_history">Medical History</label>
+          </div>
 
-        <input type="checkbox" id="password" name="updatefield" value="password">
-        <label for="password">Password</label><br/>
+          <div class="checkbox-group">
+              <input type="checkbox" id="password" name="updatefield" value="password">
+              <label for="password">Password</label>
+          </div>
 
-        <!-- Hidden Admin Data -->
-        <input type="hidden" name="admindata" value='<%= JSON.stringify(admindata) %>'>
+          <!-- Hidden Admin Data -->
+          <input type='hidden' name='admindata' value='<%= JSON.stringify(admindata) %>' />
 
-        <!-- Hidden User ID -->
-        <input type="hidden" name="userid" value="<%= userid %>">
+          <!-- Hidden User ID -->
+          <input type='hidden' name='userid' value="<%= userid %>" />
 
-        <!-- Submit Button -->
-        <button type="submit">Next</button>
-    </form>
+          <!-- Submit Button -->
+          <button type='submit'>Next</button>
+        </form>
 
-    <!-- Go Back to Dashboard -->
-    <form action="/admin/dashboard" method="post">
-        <input type="hidden" name="admindata" value='<%= JSON.stringify(admindata) %>'>
-        <button type="submit">Go Back to Dashboard</button>
-    </form>
-
+        <!-- Go Back to Dashboard -->
+        <form action="/admin/dashboard" method='post'>
+          <input type='hidden' name='admindata' value='<%= JSON.stringify(admindata) %>' />
+          <button type='submit'>Go Back to Dashboard</button>
+        </form>
+    </div>
 </body>
 </html>

@@ -3,28 +3,88 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Remove User</title>
+    <title>Remove User | Hospital Management System</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f4f4f4;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+        }
+        .container {
+            background-color: #ffffff;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+            width: 100%;
+            max-width: 500px;
+        }
+        h1 {
+            color: #2c3e50;
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        label {
+            display: block;
+            margin-top: 15px;
+            color: #34495e;
+        }
+        input {
+            width: 100%;
+            padding: 10px;
+            margin-top: 5px;
+            border-radius: 5px;
+            border: 1px solid #ddd;
+        }
+        button {
+            background-color: #e74c3c; /* Red for Remove Button */
+            color: white;
+            border: none;
+            padding: 12px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            margin-top: 20px;
+        }
+        button:hover {
+            background-color: #c0392b; /* Darker red on hover */
+        }
+        .back-button {
+            background-color: #3498db; /* Blue for Go Back Button */
+            margin-top: 10px; /* Space between buttons */
+        }
+        .back-button:hover {
+            background-color: #2980b9; /* Darker blue on hover */
+        }
+    </style>
 </head>
 <body>
-    <h1>Remove User</h1>
+    <div class="container">
+        <h1>Remove User</h1>
 
-    <!-- Form to Remove User -->
-    <form action="/admin/remove/user/username" method="post">
-        <label for="username">Enter Username:</label><br/>
-        <input type="text" id="username" name="username" required><br/>
+        <!-- Form to Remove User -->
+        <form action="/admin/remove/user/username" method="post">
+            
+            <!-- Username -->
+            <label for="username">Enter Username:</label>
+            <input type="text" id="username" name="username" required>
 
-        <!-- Hidden Admin Data -->
-        <input type="hidden" name="admindata" value='<%= JSON.stringify(admindata) %>'>
+            <!-- Hidden Admin Data -->
+            <input type="hidden" name="admindata" value='<%= JSON.stringify(admindata) %>'>
 
-        <!-- Submit Button -->
-        <button type="submit">Remove User</button>
-    </form>
+            <!-- Submit Button -->
+            <button type="submit">Remove User</button>
+        </form>
 
-    <!-- Go Back to Dashboard -->
-    <form action="/admin/dashboard" method="post">
-        <input type="hidden" name="admindata" value='<%= JSON.stringify(admindata) %>'>
-        <button type="submit">Go Back to Dashboard</button>
-    </form>
-
+        <!-- Go Back to Dashboard -->
+        <form action="/admin/dashboard" method="post">
+            <input type="hidden" name="admindata" value='<%= JSON.stringify(admindata) %>'>
+            <button type="submit" class="back-button">Go Back to Dashboard</button>
+        </form>
+    </div>
 </body>
 </html>

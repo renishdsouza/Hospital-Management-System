@@ -5,22 +5,58 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Medical Records | Hospital Management System</title>
     <style>
-        table {
-            width: 80%;
-            margin: auto;
-            border-collapse: collapse;
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f4f4f4;
+            margin: 0;
+            padding: 0;
+        }
+        .container {
+            max-width: 1000px;
+            margin: 30px auto;
+            background-color: #ffffff;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+        }
+        h2 {
+            color: #2c3e50;
             text-align: center;
+            margin-bottom: 20px;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
         }
         th, td {
-            border: 1px solid black;
-            padding: 10px;
+            padding: 12px;
+            text-align: center;
+            border-bottom: 1px solid #ddd;
         }
         th {
-            background-color: lightgray;
+            background-color: #3498db; /* Blue header */
+            color: white;
+        }
+        tr:hover {
+            background-color: #f4f4f4; /* Light hover effect */
+        }
+        button {
+            background-color: #3498db; /* Blue for buttons */
+            color: white;
+            border: none;
+            padding: 12px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            margin-top: 20px;
+        }
+        button:hover {
+            background-color: #2980b9; /* Darker blue on hover */
         }
         .no-records {
             text-align: center;
-            color: red;
+            color: #e74c3c; /* Red for no records message */
             font-weight: bold;
         }
     </style>
@@ -28,9 +64,10 @@
 <body>
     <%- include("header_logout.ejs") %>
 
-    <div style="text-align: center;">
+    <div class="container">
+        
         <!-- Go Back Button -->
-        <form action="/patients/dashboard" method="post">
+        <form action="/patients/dashboard" method="post" style="text-align:center;">
             <input type="hidden" name="patientdata" value='<%= JSON.stringify(patientdata) %>'>
             <button type="submit">Go Back</button>
         </form>
@@ -40,29 +77,33 @@
         <% let medicalRecords = []; try { medicalRecords = JSON.parse(medicalrecords) || []; } catch (e) { console.error("Error parsing medical records:", e); } %>
 
         <% if (medicalRecords.length > 0) { %>
-            <table>
-                <thead>
-                    <tr>
-                        <th>Date</th>
-                        <th>Doctor</th>
-                        <th>Diagnosis</th>
-                        <th>Prescription</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <% medicalRecords.forEach(record => { %>
-                        <tr>
-                            <td><%= record.visit_date ? new Date(record.visit_date).toISOString().split('T')[0] : "N/A" %></td>
-                            <td><%= record.doctor_name ? record.doctor_name : "N/A" %></td>
-                            <td><%= record.diagnosis ? record.diagnosis : "N/A" %></td>
-                            <td><%= record.prescription ? record.prescription : "N/A" %></td>
-                        </tr>
-                    <% }) %>
-                </tbody>
-            </table>
+          <!-- Table to Display Medical Records -->
+          <table>
+              <thead>
+                  <tr>
+                      <th>Date</th>
+                      <th>Doctor</th>
+                      <th>Diagnosis</th>
+                      <th>Prescription</th>
+                  </tr>
+              </thead>
+              <tbody>
+                  <% medicalRecords.forEach(record => { %>
+                      <tr>
+                          <td><%= record.visit_date ? new Date(record.visit_date).toISOString().split('T')[0] : "N/A" %></td>
+                          <td><%= record.doctor_name ? record.doctor_name : "N/A" %></td>
+                          <td><%= record.diagnosis ? record.diagnosis : "N/A" %></td>
+                          <td><%= record.prescription ? record.prescription : "N/A" %></td>
+                      </tr>
+                  <% }) %>
+              </tbody>
+          </table>
+
         <% } else { %>
-            <p class="no-records">No Medical Records Available</p>
+          <!-- No Records Found -->
+          <p class="no-records">No Medical Records Available</p>
         <% } %>
+
     </div>
 
     <%- include("footer.ejs") %>

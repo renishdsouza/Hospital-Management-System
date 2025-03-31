@@ -3,41 +3,95 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Add Doctor</title>
-    
+    <title>Add Doctor | Hospital Management System</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f4f4f4;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+        }
+        .container {
+            background-color: #ffffff;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+            width: 100%;
+            max-width: 500px;
+        }
+        h1 {
+            color: #2c3e50;
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        label {
+            display: block;
+            margin-top: 15px;
+            color: #34495e;
+        }
+        input {
+            width: 100%;
+            padding: 10px;
+            margin-top: 5px;
+            border-radius: 5px;
+            border: 1px solid #ddd;
+        }
+        button {
+            background-color: #3498db;
+            color: white;
+            border: none;
+            padding: 12px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            margin-top: 20px;
+        }
+        button:hover {
+            background-color: #2980b9;
+        }
+    </style>
 </head>
 <body>
-    <h1>Add Doctor</h1>
+    <div class="container">
+        <h1>Add Doctor</h1>
 
-    <!-- Form to Add Doctor -->
-    <form action="/admin/add/new/doctor/stage2" method="post">
-        <label for="name">Name:</label><br/>
-        <input type="text" id="name" name="name" required><br/>
+        <!-- Form to Add Doctor -->
+        <form action="/admin/add/new/doctor/stage2" method="post">
+            
+            <!-- Name -->
+            <label for="name">Name:</label>
+            <input type="text" id="name" name="name" required>
 
-        <label for="specialization">Specialization:</label><br/>
-        <input type="text" id="specialization" name="specialization" required><br/>
+            <!-- Specialization -->
+            <label for="specialization">Specialization:</label>
+            <input type="text" id="specialization" name="specialization" required>
 
-        <label for="phone">Phone:</label><br/>
-        <input type="text" id="phone" name="phone" required pattern="[0-9]{10}" title="Enter a valid 10-digit phone number"><br/>
+            <!-- Phone -->
+            <label for="phone">Phone:</label>
+            <input type="text" id="phone" name="phone" required pattern="[0-9]{10}" title="Enter a valid 10-digit phone number">
 
-        <label for="email">Email:</label><br/>
-        <input type="email" id="email" name="email" required><br/>
+            <!-- Email -->
+            <label for="email">Email:</label>
+            <input type="email" id="email" name="email" required>
 
-        <label for="availability">Availability:</label><br/>
-        <input type="text" id="availability" name="availability" placeholder="e.g., 9AM - 5PM" required><br/>
+            <!-- Availability -->
+            <label for="availability">Availability:</label>
+            <input type="text" id="availability" name="availability" placeholder="e.g., 9AM - 5PM" required>
 
-        <!-- Hidden Admin Data -->
-        <input type="hidden" name="admindata" value='<%= JSON.stringify(admindata) %>'>
+            <!-- Hidden Admin Data -->
+            <input type="hidden" name="admindata" value='<%= JSON.stringify(admindata) %>'>
 
-        <!-- Hidden User ID -->
-        <input type="hidden" name="userid" value="<%= userid %>">
+            <!-- Hidden User ID -->
+            <input type="hidden" name="userid" value="<%= userid %>">
 
-        <!-- Submit Button -->
-        <button type="submit">Add Doctor</button>
-    </form>
+            <!-- Submit Button -->
+            <button type="submit">Add Doctor</button>
+        </form>
 
-    <!-- Go Back to Dashboard -->
-    
-
+    </div>
 </body>
 </html>

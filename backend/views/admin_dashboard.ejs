@@ -3,21 +3,56 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Admin Dashboard</title>
+    <title>Admin Dashboard | Hospital Management System</title>
     <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f4f4f4;
+            margin: 0;
+            padding: 0;
+        }
+        .container {
+            max-width: 800px;
+            margin: 30px auto;
+            background-color: #ffffff;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+        }
+        h1 {
+            color: #2c3e50;
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        button {
+            background-color: #3498db;
+            color: white;
+            border: none;
+            padding: 12px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            margin-top: 10px;
+            width: 100%; /* Full-width buttons */
+        }
+        button:hover {
+            background-color: #2980b9;
+        }
         .success-message {
-            background-color: #4CAF50;
+            background-color: #4CAF50; /* Green for success */
             color: white;
             padding: 10px;
-            margin: 10px 0;
-            display: none;
+            margin-bottom: 15px;
+            text-align: center;
+            border-radius: 5px;
         }
         .error-message {
-            background-color: #FF5733;
+            background-color: #FF5733; /* Red for error */
             color: white;
             padding: 10px;
-            margin: 10px 0;
-            display: none;
+            margin-bottom: 15px;
+            text-align: center;
+            border-radius: 5px;
         }
     </style>
     <script>
@@ -36,36 +71,47 @@
     </script>
 </head>
 <body>
-    <%-include("header_logout.ejs");%>
-    <!-- change this to display the admin name if you wnat-->
-    <h1>Welcome, Admin</h1>
+    <%- include("header_logout.ejs"); %>
 
-    <!-- Add New User -->
-    <form action="/admin/dashboard/users/add" method="post">
-        <input type="hidden" name="admindata" value='<%= JSON.stringify(admindata) %>'>
-        <button type="submit">Add New User</button>
-    </form>
+    <div class="container">
+        <!-- Admin Welcome Message -->
+        <h1>Welcome Admin</h1>
 
-    <!-- Remove User -->
-    <form action="/admin/remove/user" method="post">
-        <input type="hidden" name="admindata" value='<%= JSON.stringify(admindata) %>'>
-        <button type="submit">Remove User</button>
-    </form>
+        <!-- Success and Error Messages -->
+        <% if (typeof successMessage !== 'undefined') { %>
+          <div id="success-message" class="success-message"><%= successMessage %></div>
+        <% } %>
+        
+        <% if (typeof errorMessage !== 'undefined') { %>
+          <div id="error-message" class="error-message"><%= errorMessage %></div>
+        <% } %>
 
-    <!-- Update User -->
-    <form action="/admin/update" method="post">
-        <input type="hidden" name="admindata" value='<%= JSON.stringify(admindata) %>'>
-        <button type="submit">Update User</button>
-    </form>
-    <!--view usernames-->
-    <form action="/admin/viewusers" method="post">
-        <input type="hidden" name="admindata" value='<%= JSON.stringify(admindata)%>'>
-        <button type="submit">View Username</button>
-    </form>
+        <!-- Add New User -->
+        <form action="/admin/dashboard/users/add" method="post">
+            <input type="hidden" name="admindata" value='<%= JSON.stringify(admindata) %>'>
+            <button type="submit">Add New User</button>
+        </form>
 
-    
+        <!-- Remove User -->
+        <form action="/admin/remove/user" method="post">
+            <input type="hidden" name="admindata" value='<%= JSON.stringify(admindata) %>'>
+            <button type="submit">Remove User</button>
+        </form>
+
+        <!-- Update User -->
+        <form action="/admin/update" method="post">
+            <input type="hidden" name="admindata" value='<%= JSON.stringify(admindata) %>'>
+            <button type="submit">Update User</button>
+        </form>
+
+        <!-- View Usernames -->
+        <form action="/admin/viewusers" method="post">
+            <input type="hidden" name="admindata" value='<%= JSON.stringify(admindata) %>'>
+            <button type="submit">View Username</button>
+        </form>
+    </div>
 
     <!-- Footer -->
-    <%-include("footer.ejs") %>
+    <%- include("footer.ejs"); %>
 </body>
 </html>

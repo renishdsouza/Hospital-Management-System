@@ -3,21 +3,77 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Appointment Scheduling - Stage 1</title>
+    <title>Appointment Scheduling - Stage 1 | Hospital Management System</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f4f4f4;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+        }
+        .container {
+            background-color: #ffffff;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+            width: 100%;
+            max-width: 500px;
+        }
+        h2 {
+            color: #2c3e50;
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        label {
+            display: block;
+            margin-top: 15px;
+            color: #34495e;
+        }
+        input {
+            width: 100%;
+            padding: 10px;
+            margin-top: 5px;
+            border-radius: 5px;
+            border: 1px solid #ddd;
+        }
+        button {
+            background-color: #3498db; /* Blue for buttons */
+            color: white;
+            border: none;
+            padding: 12px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            margin-top: 20px;
+        }
+        button:hover {
+            background-color: #2980b9; /* Darker blue on hover */
+        }
+    </style>
 </head>
 <body>
-    <h2>Search Patient</h2>
-    <form action="/new/appoinment/schedule/reception/stage1" method="post">
-        <input type="hidden" name="receptionistdata" value='<%= JSON.stringify(receptionistdata || {}) %>'>
-        
-        <label for="username">Patient Username:</label>
-        <input type="text" id="username" name="username" required>
-        
-        <label for="dob">Date of Birth:</label>
-        <input type="date" id="dob" name="dob" required>
-        
-        <button type="submit">Search Patient</button>
-    </form>
-    
+    <div class="container">
+        <h2>Search Patient</h2>
+        <form action="/new/appoinment/schedule/reception/stage1" method="post">
+            
+            <!-- Hidden Receptionist Data -->
+            <input type="hidden" name="receptionistdata" value='<%= JSON.stringify(receptionistdata || {}) %>'>
+            
+            <!-- Username Input -->
+            <label for="username">Patient Username:</label>
+            <input type="text" id="username" name="username" required>
+
+            <!-- Date of Birth Input -->
+            <label for="dob">Date of Birth:</label>
+            <input type="date" id="dob" name="dob" required>
+
+            <!-- Submit Button -->
+            <button type="submit">Search Patient</button>
+        </form>
+    </div>
 </body>
 </html>

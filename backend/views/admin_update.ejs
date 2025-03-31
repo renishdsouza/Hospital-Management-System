@@ -3,14 +3,63 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Update User Details</title>
+    <title>Update User Details | Hospital Management System</title>
     <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f4f4f4;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+        }
+        .container {
+            background-color: #ffffff;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+            width: 100%;
+            max-width: 500px;
+        }
+        h1 {
+            color: #2c3e50;
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        label {
+            display: block;
+            margin-top: 15px;
+            color: #34495e;
+        }
+        input, select {
+            width: 100%;
+            padding: 10px;
+            margin-top: 5px;
+            border-radius: 5px;
+            border: 1px solid #ddd;
+        }
+        button {
+            background-color: #3498db; /* Blue for buttons */
+            color: white;
+            border: none;
+            padding: 12px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            margin-top: 20px;
+        }
+        button:hover {
+            background-color: #2980b9; /* Darker blue on hover */
+        }
         .error-message {
-            background-color: #FF5733;
+            background-color: #FF5733; /* Red for error */
             color: white;
             padding: 10px;
-            margin: 10px 0;
-            display: none;
+            margin-bottom: 15px;
+            text-align: center;
+            border-radius: 5px;
         }
     </style>
     <script>
@@ -26,38 +75,43 @@
     </script>
 </head>
 <body>
-    <h1>Update User Details</h1>
+    <div class="container">
+        <h1>Update User Details</h1>
 
-    <!-- Error Message -->
-    <% if (typeof invalidcred !== 'undefined' && invalidcred === "false") { %>
-        <div id="error-message" class="error-message">Invalid username or role. Please try again.</div>
-    <% } %>
+        <!-- Error Message -->
+        <% if (typeof invalidcred !== 'undefined' && invalidcred === "false") { %>
+          <div id="error-message" class="error-message">Invalid username or role. Please try again.</div>
+        <% } %>
 
-    <!-- Form to Update User -->
-    <form action="/admin/update/stage1" method="post">
-        <label for="username">Enter Username:</label><br/>
-        <input type="text" id="username" name="username" required><br/>
+        <!-- Form to Update User -->
+        <form action="/admin/update/stage1" method="post">
+            
+            <!-- Username -->
+            <label for="username">Enter Username:</label>
+            <input type="text" id="username" name="username" required>
 
-        <label for="role">Select Role:</label><br/>
-        <select id="role" name="role" required>
-            <option value="">Select Role</option>
-            <option value="patient">Patient</option>
-            <option value="doctor">Doctor</option>
-            <option value="receptionist">Receptionist</option>
-        </select><br/>
+            <!-- Role -->
+            <label for="role">Select Role:</label>
+            <select id="role" name="role" required>
+                <option value="">Select Role</option>
+                <option value="patient">Patient</option>
+                <option value="doctor">Doctor</option>
+                <option value="receptionist">Receptionist</option>
+                <option value="admin">Admin</option> <!-- Added Admin as an option -->
+            </select>
 
-        <!-- Hidden Admin Data -->
-        <input type="hidden" name="admindata" value='<%= JSON.stringify(admindata) %>'>
+            <!-- Hidden Admin Data -->
+            <input type="hidden" name="admindata" value='<%= JSON.stringify(admindata) %>'>
 
-        <!-- Submit Button -->
-        <button type="submit">Next</button>
-    </form>
+            <!-- Submit Button -->
+            <button type="submit">Next</button>
+        </form>
 
-    <!-- Go Back to Dashboard -->
-    <form action="/admin/dashboard" method="post">
-        <input type="hidden" name="admindata" value='<%= JSON.stringify(admindata) %>'>
-        <button type="submit">Go Back to Dashboard</button>
-    </form>
-
+        <!-- Go Back to Dashboard -->
+        <form action="/admin/dashboard" method="post">
+          <input type="hidden" name="admindata" value='<%= JSON.stringify(admindata) %>'>
+          <button type="submit">Go Back to Dashboard</button>
+        </form>
+    </div>
 </body>
 </html>

@@ -3,20 +3,98 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Appointment Scheduled Successfully</title>
+    <title>Appointment Scheduled Successfully | Hospital Management System</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f4f4f4;
+            margin: 0;
+            padding: 0;
+        }
+        header {
+            background-color: #2c3e50; /* Dark blue-gray for header */
+            color: white;
+            padding: 10px 20px;
+            display: flex;
+            justify-content: space-between; /* Align items to left and right */
+            align-items: center; /* Vertically center items */
+            position: sticky; /* Sticks to the top of the page */
+            top: 0;
+            z-index: 1000; /* Ensures header stays above other elements */
+        }
+        .header-title {
+            font-size: 20px;
+            font-weight: bold;
+        }
+        .logout-form {
+            margin: 0; /* Remove default form margin */
+        }
+        .logout-form button {
+            background-color: #e74c3c; /* Red for logout button */
+            color: white;
+            border: none;
+            padding: 8px 15px;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        .logout-form button:hover {
+            background-color: #c0392b; /* Darker red on hover */
+        }
+        .container {
+            background-color: #ffffff;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+            width: 100%;
+            max-width: 600px;
+            margin: 30px auto; /* Center container horizontally */
+            text-align: center;
+        }
+        h2 {
+            color: #2ecc71; /* Green for success message */
+            margin-bottom: 20px;
+        }
+        p {
+            color: #34495e; /* Dark gray for text */
+            font-size: 16px;
+        }
+        button {
+            background-color: #3498db; /* Blue for buttons */
+            color: white;
+            border: none;
+            padding: 12px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            margin-top: 20px;
+        }
+        button:hover {
+            background-color: #2980b9; /* Darker blue on hover */
+        }
+    </style>
 </head>
 <body>
-    <%- include("header_logout.ejs") %>
-    <!-- Success Message -->
-    <h2>Appointment Scheduled Successfully!</h2>
-    <p>Receptionist: <%= typeof receptionistdata !== 'undefined' && receptionistdata.name ? receptionistdata.name : 'Unknown Receptionist' %></p>
-    
-    <form action="/reception/dashboard" method="get">
-        <input type="hidden" name="receptionistdata" value='<%= JSON.stringify(receptionistdata || {}) %>'>
-        <button type="submit">Go Back to Dashboard</button>
-    </form>
-    
-    
+    <!-- Header Section -->
+    <header>
+        <div class="header-title">Hospital Management System</div>
+        
+        <!-- Logout Button -->
+        <form action="/logout" method="post" class="logout-form">
+            <button type="submit">Logout</button>
+        </form>
+    </header>
 
+    <!-- Main Content -->
+    <div class="container">
+        <!-- Success Message -->
+        <h2>Appointment Scheduled Successfully!</h2>
+        <p>Receptionist: <%= typeof receptionistdata !== 'undefined' && receptionistdata.name ? receptionistdata.name : 'Unknown Receptionist' %></p>
+
+        <!-- Go Back to Dashboard Button -->
+        <form action="/reception/dashboard" method="get">
+            <input type="hidden" name="receptionistdata" value='<%= JSON.stringify(receptionistdata || {}) %>'>
+            <button type="submit">Go Back to Dashboard</button>
+        </form>
+    </div>
 </body>
 </html>

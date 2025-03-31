@@ -14,6 +14,7 @@ const port = 3000;
 
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(express.json()); // For JSON data
+app.use(express.static('public'));
 app.set("view engine", "ejs");
 app.set("views", path.join(__dirname, "views"));
 

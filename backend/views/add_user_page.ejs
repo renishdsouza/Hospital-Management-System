@@ -3,43 +3,106 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Add New User</title>
+    <title>Add New User | Hospital Management System</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f4f4f4;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+        }
+        .container {
+            background-color: #ffffff;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+            width: 100%;
+            max-width: 500px;
+        }
+        h1 {
+            color: #2c3e50;
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        label {
+            display: block;
+            margin-top: 15px;
+            color: #34495e;
+        }
+        input, select {
+            width: 100%;
+            padding: 10px;
+            margin-top: 5px;
+            border-radius: 5px;
+            border: 1px solid #ddd;
+        }
+        button {
+            background-color: #3498db;
+            color: white;
+            border: none;
+            padding: 12px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            margin-top: 20px;
+        }
+        button:hover {
+            background-color: #2980b9;
+        }
+        .error-message {
+            background-color: #e74c3c; /* Red for error */
+            color: white;
+            padding: 10px;
+            margin-bottom: 15px;
+            text-align: center;
+            border-radius: 5px;
+        }
+    </style>
 </head>
 <body>
-    <% if (useralreadypresent === "true") { %>
-        <div id="error-message" class="error-message">Username is already taken!</div>
-    <% } %>
+    <div class="container">
+        <% if (useralreadypresent === "true") { %>
+            <div id="error-message" class="error-message">Username is already taken!</div>
+        <% } %>
 
-    <h1>Add New User</h1>
+        <h1>Add New User</h1>
 
-    <!-- Form to Add New User -->
-    <form action="/admin/add/new/user/stage1" method="post">
-        <label for="username">Username:</label><br/>
-        <input type="text" id="username" name="username" required><br/>
+        <!-- Form to Add New User -->
+        <form action="/admin/add/new/user/stage1" method="post">
+            
+            <!-- Username -->
+            <label for="username">Username:</label>
+            <input type="text" id="username" name="username" required>
 
-        <label for="password">Password:</label><br/>
-        <input type="password" id="password" name="password" required><br/>
+            <!-- Password -->
+            <label for="password">Password:</label>
+            <input type="password" id="password" name="password" required>
 
-        <label for="role">Role:</label><br/>
-        <select id="role" name="role" required>
-            <option value="">Select Role</option>
-            <option value="patient">Patient</option>
-            <option value="doctor">Doctor</option>
-            <option value="receptionist">Receptionist</option>
-        </select><br/>
+            <!-- Role -->
+            <label for="role">Role:</label>
+            <select id="role" name="role" required>
+                <option value="">Select Role</option>
+                <option value="patient">Patient</option>
+                <option value="doctor">Doctor</option>
+                <option value="receptionist">Receptionist</option>
+            </select>
 
-        <!-- Hidden Admin Data -->
-        <input type="hidden" name="admindata" value='<%= JSON.stringify(admindata) %>'>
+            <!-- Hidden Admin Data -->
+            <input type="hidden" name="admindata" value='<%= JSON.stringify(admindata) %>'>
 
-        <!-- Submit Button -->
-        <button type="submit">Next</button>
-    </form>
+            <!-- Submit Button -->
+            <button type="submit">Next</button>
+        </form>
 
-    <!-- Go Back to Dashboard -->
-    <form action="/admin/dashboard" method="post">
-        <input type="hidden" name="admindata" value='<%= JSON.stringify(admindata) %>'>
-        <button type="submit">Go Back to Dashboard</button>
-    </form>
-
+        <!-- Go Back to Dashboard -->
+        <form action="/admin/dashboard" method="post">
+            <input type="hidden" name="admindata" value='<%= JSON.stringify(admindata) %>'>
+            <button type="submit">Go Back to Dashboard</button>
+        </form>
+    </div>
 </body>
 </html>

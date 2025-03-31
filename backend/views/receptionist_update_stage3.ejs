@@ -3,51 +3,126 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Update Receptionist Details</title>
+    <title>Update Receptionist Details | Hospital Management System</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f4f4f4;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+        }
+        .container {
+            background-color: #ffffff;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+            width: 100%;
+            max-width: 500px;
+        }
+        h1 {
+            color: #2c3e50;
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        label {
+            margin-left: 10px; /* Space between checkbox and label */
+        }
+        .checkbox-group {
+            display: flex;
+            align-items: center;
+            margin-top: 10px; /* Space between checkboxes */
+        }
+        input[type="checkbox"] {
+            margin-right: 10px; /* Space between checkbox and label */
+        }
+        button {
+            background-color: #3498db; /* Blue for buttons */
+            color: white;
+            border: none;
+            padding: 12px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            margin-top: 20px;
+        }
+        button:hover {
+            background-color: #2980b9; /* Darker blue on hover */
+        }
+        .error-message {
+            background-color: #FF5733; /* Red for error */
+            color: white;
+            padding: 10px;
+            margin-bottom: 15px;
+            text-align: center;
+            border-radius: 5px;
+        }
+    </style>
+    <script>
+        document.addEventListener("DOMContentLoaded", function() {
+            const errorMessage = document.getElementById("error-message");
+
+            if (errorMessage) errorMessage.style.display = "block";
+
+            setTimeout(() => {
+                if (errorMessage) errorMessage.style.display = "none";
+            }, 3000);
+        });
+    </script>
 </head>
 <body>
-    <h1>Update Receptionist Details</h1>
+    <div class="container">
+        <h1>Update Receptionist Details</h1>
 
-    <!-- Form to Update Receptionist Details -->
-    <form action="/admin/update/stage3/receptionist" method="post">
-        <% if (chosenfields.name === "true") { %>
-            <label for="name">Name:</label><br/>
-            <input type="text" id="name" name="name" required><br/>
+        <!-- Error Message -->
+        <% if (typeof nofieldchosend !== 'undefined' && nofieldchosend === "false") { %>
+          <div id="error-message" class="error-message">No fields selected for update. Please choose at least one field.</div>
         <% } %>
 
-        <% if (chosenfields.email === "true") { %>
-            <label for="email">Email:</label><br/>
-            <input type="email" id="email" name="email" required><br/>
-        <% } %>
+        <!-- Form to Select Fields to Update -->
+        <form action="/admin/update/stage2/receptionist" method="post">
+            
+          <p>Select the fields you want to update:</p>
 
-        <% if (chosenfields.phone === "true") { %>
-            <label for="phone">Phone:</label><br/>
-            <input type="text" id="phone" name="phone" required pattern="[0-9]{10}" title="Enter a valid 10-digit phone number"><br/>
-        <% } %>
+          <!-- Checkboxes for Fields -->
+          <div class="checkbox-group">
+              <input type="checkbox" id="name" name="updatefield" value="name">
+              <label for="name">Name</label>
+          </div>
 
-        <% if (chosenfields.password === "true") { %>
-            <label for="password">Password:</label><br/>
-            <input type="password" id="password" name="password"><br/>
-        <% } %>
+          <div class="checkbox-group">
+              <input type="checkbox" id="email" name="updatefield" value="email">
+              <label for="email">Email</label>
+          </div>
 
-        <!-- Hidden Admin Data -->
-        <input type="hidden" name="admindata" value='<%= JSON.stringify(admindata) %>'>
+          <div class="checkbox-group">
+              <input type="checkbox" id="phone" name="updatefield" value="phone">
+              <label for="phone">Phone</label>
+          </div>
 
-        <!-- Hidden User ID -->
-        <input type="hidden" name="userid" value="<%= userid %>">
+          <div class="checkbox-group">
+              <input type="checkbox" id="password" name="updatefield" value="password">
+              <label for="password">Password</label>
+          </div>
 
-        <!-- Hidden Chosen Fields -->
-        <input type="hidden" name='chosenfields' value='<%= JSON.stringify(chosenfields) %>'>
+          <!-- Hidden Admin Data -->
+          <input type="hidden" name="admindata" value='<%= JSON.stringify(admindata) %>'>
 
-        <!-- Submit Button -->
-        <button type="submit">Update Receptionist</button>
-    </form>
+          <!-- Hidden User ID -->
+          <input type="hidden" name="userid" value="<%= userid %>">
 
-    <!-- Go Back to Dashboard -->
-    <form action="/admin/dashboard" method='post'>
-        <input type='hidden' name='admindata' value='<%= JSON.stringify(admindata) %>' />
-        <button type='submit'>Go Back to Dashboard</button>
-    </form>
+          <!-- Submit Button -->
+          <button type="submit">Next</button>
+        </form>
 
+        <!-- Go Back to Dashboard -->
+        <form action="/admin/dashboard" method="post">
+          <input type="hidden" name="admindata" value='<%= JSON.stringify(admindata) %>'>
+          <button type="submit">Go Back to Dashboard</button>
+        </form>
+    </div>
 </body>
 </html>

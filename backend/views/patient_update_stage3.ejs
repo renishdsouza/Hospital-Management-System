@@ -3,91 +3,146 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Update Patient Details</title>
+    <title>Update Patient Details | Hospital Management System</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f4f4f4;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+        }
+        .container {
+            background-color: #ffffff;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+            width: 100%;
+            max-width: 600px;
+        }
+        h1 {
+            color: #2c3e50;
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        label {
+            display: block;
+            margin-top: 15px;
+            color: #34495e;
+        }
+        input, select, textarea {
+            width: 100%;
+            padding: 10px;
+            margin-top: 5px;
+            border-radius: 5px;
+            border: 1px solid #ddd;
+        }
+        textarea {
+            resize: none; /* Prevent resizing */
+        }
+        button {
+            background-color: #3498db; /* Blue for buttons */
+            color: white;
+            border: none;
+            padding: 12px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            margin-top: 20px;
+        }
+        button:hover {
+            background-color: #2980b9; /* Darker blue on hover */
+        }
+    </style>
 </head>
 <body>
-    <h1>Update Patient Details</h1>
+    <div class="container">
+        <h1>Update Patient Details</h1>
 
-    <!-- Form to Update Patient Details -->
-    <form action="/admin/update/stage3/patient" method="post">
-        <% if (chosenfields.name === "true") { %>
-            <label for="name">Name:</label><br/>
-            <input type="text" id="name" name="name" required><br/>
-        <% } %>
+        <!-- Form to Update Patient Details -->
+        <form action="/admin/update/stage3/patient" method="post">
+            
+            <% if (chosenfields.name === "true") { %>
+                <label for="name">Name:</label>
+                <input type="text" id="name" name="name" required>
+            <% } %>
 
-        <% if (chosenfields.dob === "true") { %>
-            <label for="dob">Date of Birth:</label><br/>
-            <input type="date" id="dob" name="dob" required><br/>
-        <% } %>
+            <% if (chosenfields.dob === "true") { %>
+                <label for="dob">Date of Birth:</label>
+                <input type="date" id="dob" name="dob" required>
+            <% } %>
 
-        <% if (chosenfields.gender === "true") { %>
-            <label for="gender">Gender:</label><br/>
-            <select id="gender" name="gender" required>
-                <option value="">Select Gender</option>
-                <option value="Male">Male</option>
-                <option value="Female">Female</option>
-                <option value="Other">Other</option>
-            </select><br/>
-        <% } %>
+            <% if (chosenfields.gender === "true") { %>
+                <label for="gender">Gender:</label>
+                <select id="gender" name="gender" required>
+                    <option value="">Select Gender</option>
+                    <option value="Male">Male</option>
+                    <option value="Female">Female</option>
+                    <option value="Other">Other</option>
+                </select>
+            <% } %>
 
-        <% if (chosenfields.phone === "true") { %>
-            <label for="phone">Phone:</label><br/>
-            <input type="text" id="phone" name="phone" required pattern="[0-9]{10}" title="Enter a valid 10-digit phone number"><br/>
-        <% } %>
+            <% if (chosenfields.phone === "true") { %>
+                <label for="phone">Phone:</label>
+                <input type="text" id="phone" name="phone" required pattern="[0-9]{10}" title="Enter a valid 10-digit phone number">
+            <% } %>
 
-        <% if (chosenfields.email === "true") { %>
-            <label for="email">Email:</label><br/>
-            <input type="email" id="email" name="email" required><br/>
-        <% } %>
+            <% if (chosenfields.email === "true") { %>
+                <label for="email">Email:</label>
+                <input type="email" id="email" name="email" required>
+            <% } %>
 
-        <% if (chosenfields.address === "true") { %>
-            <label for="address">Address:</label><br/>
-            <textarea id="address" name="address" rows="3" cols="50" required></textarea><br/>
-        <% } %>
+            <% if (chosenfields.address === "true") { %>
+                <label for="address">Address:</label>
+                <textarea id="address" name="address" rows="3" required></textarea>
+            <% } %>
 
-        <% if (chosenfields.blood_group === "true") { %>
-            <label for="blood_group">Blood Group:</label><br/>
-            <select id="blood_group" name="blood_group">
-                <option value="">Select Blood Group</option>
-                <option value="A+">A+</option>
-                <option value="A-">A-</option>
-                <option value="B+">B+</option>
-                <option value="B-">B-</option>
-                <option value="O+">O+</option>
-                <option value="O-">O-</option>
-                <option value="AB+">AB+</option>
-                <option value="AB-">AB-</option>
-            </select><br/>
-        <% } %>
+            <% if (chosenfields.blood_group === "true") { %>
+                <label for="blood_group">Blood Group:</label>
+                <select id="blood_group" name="blood_group">
+                    <option value="">Select Blood Group</option>
+                    <option value="A+">A+</option>
+                    <option value="A-">A-</option>
+                    <option value="B+">B+</option>
+                    <option value="B-">B-</option>
+                    <option value="O+">O+</option>
+                    <option value="O-">O-</option>
+                    <option value="AB+">AB+</option>
+                    <option value="AB-">AB-</option>
+                </select>
+            <% } %>
 
-        <% if (chosenfields.medical_history === "true") { %>
-            <label for="medical_history">Medical History:</label><br/>
-            <textarea id="medical_history" name="medical_history" rows="4" cols="50"></textarea><br/>
-        <% } %>
+            <% if (chosenfields.medical_history === "true") { %>
+                <label for="medical_history">Medical History:</label>
+                <textarea id="medical_history" name="medical_history" rows="4"></textarea>
+            <% } %>
 
-        <% if (chosenfields.password === "true") { %>
-            <label for="password">Password:</label><br/>
-            <input type="password" id="password" name="password"><br/>
-        <% } %>
+            <% if (chosenfields.password === "true") { %>
+                <label for="password">Password:</label>
+                <input type="password" id="password" name="password">
+            <% } %>
 
-        <!-- Hidden Admin Data -->
-        <input type='hidden' name='admindata' value='<%= JSON.stringify(admindata) %>' />
+            <!-- Hidden Admin Data -->
+            <input type='hidden' name='admindata' value='<%= JSON.stringify(admindata) %>' />
 
-        <!-- Hidden User ID -->
-        <input type='hidden' name='userid' value='<%= userid %>' />
+            <!-- Hidden User ID -->
+            <input type='hidden' name='userid' value='<%= userid %>' />
 
-        <!-- Hidden Chosen Fields -->
-        <input type='hidden' name='chosenfields' value='<%= JSON.stringify(chosenfields) %>' />
+            <!-- Hidden Chosen Fields -->
+            <input type='hidden' name='chosenfields' value='<%= JSON.stringify(chosenfields) %>' />
 
-        <!-- Submit Button -->
-        <button type='submit'>Update Patient</button>
-    </form>
+            <!-- Submit Button -->
+            <button type='submit'>Update Patient</button>
+        </form>
 
-    <!-- Go Back to Dashboard -->
-    <form action="/admin/dashboard" method='post'>
-        <input type='hidden' name='admindata' value='<%= JSON.stringify(admindata) %>' />
-        <button type='submit'>Go Back to Dashboard</button>
-    </form>
-
+        <!-- Go Back to Dashboard -->
+        <form action="/admin/dashboard" method='post'>
+          <input type='hidden' name='admindata' value='<%= JSON.stringify(admindata) %>' />
+          <button type='submit'>Go Back to Dashboard</button>
+        </form>
+    </div>
 </body>
 </html>

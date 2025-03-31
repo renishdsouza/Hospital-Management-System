@@ -3,29 +3,70 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>View Appointments</title>
+    <title>View Appointments | Hospital Management System</title>
     <style>
-        table {
-            width: 80%;
-            margin: auto;
-            border-collapse: collapse;
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f4f4f4;
+            margin: 0;
+            padding: 0;
+        }
+        .container {
+            max-width: 1000px;
+            margin: 30px auto;
+            background-color: #ffffff;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+        }
+        h2 {
+            color: #2c3e50;
             text-align: center;
+            margin-bottom: 20px;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
         }
         th, td {
-            border: 1px solid black;
-            padding: 10px;
+            padding: 12px;
+            text-align: center;
+            border-bottom: 1px solid #ddd;
         }
         th {
-            background-color: lightgray;
+            background-color: #3498db; /* Blue header */
+            color: white;
+        }
+        tr:hover {
+            background-color: #f4f4f4; /* Light hover effect */
+        }
+        button {
+            background-color: #3498db; /* Blue for buttons */
+            color: white;
+            border: none;
+            padding: 12px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            margin-top: 20px;
+        }
+        button:hover {
+            background-color: #2980b9; /* Darker blue on hover */
+        }
+        p {
+            text-align: center;
+            color: #e74c3c; /* Red for no appointments message */
         }
     </style>
 </head>
 <body>
     <%- include("header_logout.ejs") %>
 
-    <div style="text-align: center;">
+    <div class="container">
+        
         <!-- Go Back Button -->
-        <form action="/patients/dashboard" method="post">
+        <form action="/patients/dashboard" method="post" style="text-align:center;">
             <input type="hidden" name="patientdata" value='<%= JSON.stringify(patientdata) %>'>
             <button type="submit">Go Back</button>
         </form>
@@ -33,31 +74,33 @@
         <h2>Your Appointments</h2>
 
         <% if (noAppointments) { %>
-            <p>No Appointments Found.</p>
+          <p>No Appointments Found.</p>
         <% } else { %>
-            <table>
-                <thead>
-                    <tr>
-                        <th>Appointment Date</th>
-                        <th>Time</th>
-                        <th>Doctor Name</th>
-                        <th>Specialization</th>
-                        <th>Status</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <% appointments.forEach(appointment => { %>
-                        <tr>
-                            <td><%= appointment.appointment_date ? new Date(appointment.appointment_date).toISOString().split('T')[0] : "N/A" %></td>
-                            <td><%= appointment.appointment_time ? appointment.appointment_time : "N/A" %></td>
-                            <td><%= appointment.doctor_name ? appointment.doctor_name : "N/A" %></td>
-                            <td><%= appointment.specialization ? appointment.specialization : "N/A" %></td>
-                            <td><%= appointment.status ? appointment.status : "N/A" %></td>
-                        </tr>
-                    <% }) %>
-                </tbody>
-            </table>
+          <!-- Table to Display Appointments -->
+          <table>
+              <thead>
+                  <tr>
+                      <th>Appointment Date</th>
+                      <th>Time</th>
+                      <th>Doctor Name</th>
+                      <th>Specialization</th>
+                      <th>Status</th>
+                  </tr>
+              </thead>
+              <tbody>
+                  <% appointments.forEach(appointment => { %>
+                      <tr>
+                          <td><%= appointment.appointment_date ? new Date(appointment.appointment_date).toISOString().split('T')[0] : "N/A" %></td>
+                          <td><%= appointment.appointment_time ? appointment.appointment_time : "N/A" %></td>
+                          <td><%= appointment.doctor_name ? appointment.doctor_name : "N/A" %></td>
+                          <td><%= appointment.specialization ? appointment.specialization : "N/A" %></td>
+                          <td><%= appointment.status ? appointment.status : "N/A" %></td>
+                      </tr>
+                  <% }) %>
+              </tbody>
+          </table>
         <% } %>
+
     </div>
 
     <%- include("footer.ejs") %>

@@ -4,25 +4,76 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Patient Dashboard | Hospital Management System</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f4f4f4;
+            margin: 0;
+            padding: 0;
+        }
+        .container {
+            max-width: 800px;
+            margin: 30px auto;
+            background-color: #ffffff;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+        }
+        h1 {
+            color: #2c3e50;
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        h2 {
+            color: #34495e;
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        .content {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        form {
+            margin-bottom: 20px; /* Space between buttons */
+        }
+        button {
+            background-color: #3498db; /* Blue for buttons */
+            color: white;
+            border: none;
+            padding: 12px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+        button:hover {
+            background-color: #2980b9; /* Darker blue on hover */
+        }
+    </style>
 </head>
 <body>
     <%- include("header_logout.ejs") %>
+    
     <div class="container">
-        <h1 class="header">HMS</h1>
+        <h1>Hospital Management System</h1>
+        
         <div class="content">
             <h2>Welcome, <%= patientdata.name ? patientdata.name : "Patient" %></h2>
 
+            <!-- View Appointments Button -->
             <form action="/patient/appointment" method="post">
                 <input type="hidden" name="patientdata" value="<%= JSON.stringify(patientdata) %>">
                 <button type="submit">View Appointments</button>
             </form>
 
+            <!-- View Medical Records Button -->
             <form action="/patients/medical/records" method="post">
                 <input type="hidden" name="patientdata" value="<%= JSON.stringify(patientdata) %>">
                 <button type="submit">View Medical Records</button>
             </form>
         </div>
     </div>
+
     <%- include("footer.ejs") %>
 </body>
 </html>

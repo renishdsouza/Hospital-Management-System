@@ -3,24 +3,122 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Select Date to Access Appointments</title>
+    <title>Select Date to Access Appointments | Hospital Management System</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f4f4f4;
+            margin: 0;
+            padding: 0;
+        }
+        header {
+            background-color: #2c3e50; /* Dark blue-gray for header */
+            color: white;
+            padding: 10px 20px;
+            display: flex;
+            justify-content: space-between; /* Align items to left and right */
+            align-items: center; /* Vertically center items */
+            position: sticky; /* Sticks to the top of the page */
+            top: 0;
+            z-index: 1000; /* Ensures header stays above other elements */
+        }
+        .header-title {
+            font-size: 20px;
+            font-weight: bold;
+        }
+        .logout-form {
+            margin: 0; /* Remove default form margin */
+        }
+        .logout-form button {
+            background-color: #e74c3c; /* Red for logout button */
+            color: white;
+            border: none;
+            padding: 8px 15px;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        .logout-form button:hover {
+            background-color: #c0392b; /* Darker red on hover */
+        }
+        .container {
+            background-color: #ffffff;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+            width: 100%;
+            max-width: 500px;
+            margin: 30px auto; /* Center container horizontally */
+        }
+        h1 {
+            color: #2c3e50;
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        label {
+            display: block;
+            margin-top: 15px;
+            color: #34495e;
+        }
+        input[type="date"] {
+            width: 100%;
+            padding: 10px;
+            margin-top: 5px;
+            border-radius: 5px;
+            border: 1px solid #ddd;
+        }
+        button {
+            background-color: #3498db; /* Blue for buttons */
+            color: white;
+            border: none;
+            padding: 12px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            margin-top: 20px;
+        }
+        button:hover {
+            background-color: #2980b9; /* Darker blue on hover */
+        }
+    </style>
 </head>
 <body>
-    <%- include("header_logout.ejs") %>
-    <h1>Select a Date to Get Appointments</h1>
+    <!-- Header Section -->
+    <header>
+        <div class="header-title">Hospital Management System</div>
+        
+        <!-- Logout Button -->
+        <form action="/logout" method="post" class="logout-form">
+            <button type="submit">Logout</button>
+        </form>
+    </header>
 
-    <!-- Date Selection Form -->
-    <form action="/doctor/dashboard/appointments/date/medicalrecord" method="post">
-        <input type="hidden" name="doctordata" value="<%= JSON.stringify(doctordata) %>">
-        <label for="date">Select Date:</label>
-        <input type="date" id="date" name="date" required>
-        <button type="submit">Next</button>
-    </form>
+    <!-- Main Content -->
+    <div class="container">
+        <h1>Select a Date to Get Appointments</h1>
 
-    <!-- Go Back to Dashboard -->
-    <form action="/doctor/dashboard" method="post">
-        <input type="hidden" name="doctordata" value="<%= JSON.stringify(doctordata) %>">
-        <button type="submit">Go Back to Dashboard</button>
-    </form>
+        <!-- Date Selection Form -->
+        <form action="/doctor/dashboard/appointments/date/medicalrecord" method="post">
+            
+            <!-- Hidden Doctor Data -->
+            <input type="hidden" name="doctordata" value="<%= JSON.stringify(doctordata) %>">
+
+            <!-- Date Input -->
+            <label for="date">Select Date:</label>
+            <input type="date" id="date" name="date" required>
+
+            <!-- Submit Button -->
+            <button type="submit">Next</button>
+        </form>
+
+        <!-- Go Back to Dashboard -->
+        <form action="/doctor/dashboard" method="post">
+            
+            <!-- Hidden Doctor Data -->
+            <input type="hidden" name="doctordata" value="<%= JSON.stringify(doctordata) %>">
+
+            <!-- Back Button -->
+            <button type="submit">Go Back to Dashboard</button>
+        </form>
+    </div>
 </body>
 </html>
