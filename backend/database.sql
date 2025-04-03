@@ -19,7 +19,7 @@ CREATE TABLE "user" (
 
 -- Patient Table
 CREATE TABLE patient (
-    patient_id SERIAL PRIMARY KEY,
+    patient_id SERIAL PRIMARY KEY,--similar to auto-increment in sql
     user_id INT UNIQUE NOT NULL,
     name VARCHAR(100) NOT NULL,
     dob DATE NOT NULL,
@@ -29,7 +29,7 @@ CREATE TABLE patient (
     address TEXT NOT NULL,
     blood_group VARCHAR(5),
     medical_history TEXT,
-    FOREIGN KEY (user_id) REFERENCES "user"(user_id) ON DELETE CASCADE
+    FOREIGN KEY (user_id) REFERENCES "user"(user_id) ON DELETE CASCADE --will ensure referential integrity constraint
 );
 
 -- Doctor Table
