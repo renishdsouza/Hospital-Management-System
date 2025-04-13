@@ -10,6 +10,7 @@ CREATE TYPE gender_type AS ENUM ('Male', 'Female', 'Other');
 CREATE TYPE appointment_status AS ENUM ('Scheduled', 'Completed', 'Cancelled');
 
 -- User Table
+--5nf
 CREATE TABLE "user" (
     user_id SERIAL PRIMARY KEY,
     username VARCHAR(50) UNIQUE NOT NULL,
@@ -18,6 +19,7 @@ CREATE TABLE "user" (
 );
 
 -- Patient Table
+--5nf
 CREATE TABLE patient (
     patient_id SERIAL PRIMARY KEY,--similar to auto-increment in sql
     user_id INT UNIQUE NOT NULL,
@@ -33,6 +35,7 @@ CREATE TABLE patient (
 );
 
 -- Doctor Table
+--5nf
 CREATE TABLE doctor (
     doctor_id SERIAL PRIMARY KEY,
     user_id INT UNIQUE NOT NULL,
@@ -45,6 +48,7 @@ CREATE TABLE doctor (
 );
 
 -- Receptionist Table
+--5nf
 CREATE TABLE receptionist (
     receptionist_id SERIAL PRIMARY KEY,
     user_id INT UNIQUE NOT NULL,
@@ -55,6 +59,7 @@ CREATE TABLE receptionist (
 );
 
 -- Admin Table
+--5nf
 CREATE TABLE admin (
     admin_id SERIAL PRIMARY KEY,
     user_id INT UNIQUE NOT NULL,
@@ -65,10 +70,11 @@ CREATE TABLE admin (
 );
 
 -- Appointment Table
+--5nf
 CREATE TABLE appointment (
     appointment_id SERIAL PRIMARY KEY,
-    patient_id INT NOT NULL,
-    doctor_id INT NOT NULL,
+    patient_id INT NOT NULL, 
+    doctor_id INT NOT NULL, --make it nullable
     date DATE NOT NULL,
     time TIME NOT NULL DEFAULT '00:00:00',
     status appointment_status NOT NULL DEFAULT 'Scheduled',
@@ -77,6 +83,7 @@ CREATE TABLE appointment (
 );
 
 -- Medical Records Table
+--5nf
 CREATE TABLE medicalrecords (
     record_id SERIAL PRIMARY KEY,
     patient_id INT NOT NULL,
