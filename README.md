@@ -1,13 +1,83 @@
-# Hospital_Management_System
-Building a Hospital Management system for our Course project in which we use PostgreSQL, NodeJS, ExpressJS, EJS and other
-The backend folder contain all the files necessary for the project all other files outside the backend folder are not included in the project.
-[]To run the project clone the repo
-[]Then change to the bakcend directory
-[]Setup the env file with your database(PostgreSQL)
-  The env file must contian the following fields:
+# 🏥 Hospital_Management_System
+
+Building a Hospital Management System for our course project using **PostgreSQL**, **Node.js**, **Express.js**, **EJS**, and more.
+
+> 📁 Only the `backend` folder contains the files necessary to run the project. All other files outside this folder are not part of the backend.
+
+---
+
+## 🚀 How to Run the Project
+
+Follow the steps below to set up and run the project locally:
+
+### ✅ Step-by-Step Instructions
+
+1. **Clone the Repository**
+
+    ```bash
+    git clone https://github.com/yourusername/Hospital_Management_System.git
+    ```
+
+2. **Navigate to the Backend Directory**
+
+    ```bash
+    cd Hospital_Management_System/backend
+    ```
+
+3. **Set Up Environment Variables**
+
+    Create a `.env` file in the `backend` directory and add the following:
+
+    ```env
     DB_USER=yourdbuser
     DB_HOST=localhost
     DB_NAME=databasename
     DB_PASSWORD=yourpassword
-    DB_PORT=portno.
- []Use nodemon index.js to start the server   
+    DB_PORT=portno
+    ```
+
+    - `DB_USER`   : Your PostgreSQL username  
+    - `DB_HOST`   : Typically `localhost`  
+    - `DB_NAME`   : The name of your database  
+    - `DB_PASSWORD` : Your PostgreSQL password  
+    - `DB_PORT`   : Default is usually `5432`
+
+4. **Install Dependencies**
+
+    Run the following command to install all Node.js dependencies:
+
+    ```bash
+    npm install
+    ```
+
+5. **Start the Server**
+
+    Run the server using `nodemon`:
+
+    ```bash
+    nodemon index.js
+    ```
+
+    > If `nodemon` is not installed globally, you can install it with:
+
+    ```bash
+    npm install -g nodemon
+    ```
+
+---
+
+## 📁 Project Structure
+
+```text
+Hospital_Management_System/
+├── backend/                   # Backend logic (Express.js, PostgreSQL)
+│   ├── public/               # Static files (CSS, JS)
+│   ├── views/                # EJS templates for frontend rendering
+│   ├── .env                  # Environment variables file
+│   ├── index.js              # Entry point of the backend server
+│ 
+├── README.md                 # Root project documentation
+
+
+
+
