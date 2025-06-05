@@ -78,6 +78,7 @@ Hospital_Management_System/
 │ 
 ├── README.md                 # Root project documentation
 
-
+## For adding functionalities:
+Create a pull request with detailed explanation of the feature and it's use we will review it at our earliest and get back to you.
 
 
