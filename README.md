@@ -2,7 +2,7 @@
 
 Building a Hospital Management System for our course project using **PostgreSQL**, **Node.js**, **Express.js**, **EJS**, and more.
 
-> 📁 Only the `backend` folder contains the files necessary to run the project. All other files outside this folder are not part of the backend.
+> 📁 Only the `backend` folder contains the files necessary to run the project. All other files outside this folder are not required.
 
 ---
 
@@ -63,6 +63,7 @@ Follow the steps below to set up and run the project locally:
     ```bash
     npm install -g nodemon
     ```
+    > You can also install it locally instead of locally by removing the -g flag from above:
 
 ---
 
