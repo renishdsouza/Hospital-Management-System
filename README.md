@@ -78,9 +78,10 @@ Hospital_Management_System/
 │   ├── index.js              # Entry point of the backend server
 │ 
 ├── README.md                 # Root project documentation
-
+```
 
 ## For Contributing:
-Create a pull request with detailed explanation of the feature and it's use we will review it at our earliest and get back to you.Also you can check the issues raised and work upon them and raise a pull request linked with the issue
+Create a pull request with detailed explanation of the feature and it's use we will review it at our earliest and get back to you.
+Also you can check the issues raised and work upon them and raise a pull request linked with the issue.
 
 
