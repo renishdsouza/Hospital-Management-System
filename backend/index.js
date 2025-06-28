@@ -1,6 +1,6 @@
 import express from 'express';
-import bodyParser from 'body-parser';
-// import cors from 'cors';
+import bodyParser from 'body-parser';//not needed try default does node stream parse
+// import cors from 'cors'; //When using react diff port cross origin resource sharing
 import pg from 'pg';
 import dotenv from 'dotenv';
 import path from 'path';
@@ -12,13 +12,13 @@ const __dirname = path.dirname(__filename);
 const app = express();
 const port = 3000;
 
-app.use(bodyParser.urlencoded({ extended: true }));
+app.use(bodyParser.urlencoded({ extended: true }));//uses qs library obj in obj for []
 app.use(express.json()); // For JSON data
 app.use(express.static('public'));
 app.set("view engine", "ejs");
 app.set("views", path.join(__dirname, "views"));
 
-const pool = new pg.Pool({
+const pool = new pg.Pool({ //default 100 connections
     user: process.env.DB_USER,
     host: process.env.DB_HOST,
     database: process.env.DB_NAME,
@@ -30,7 +30,7 @@ pool.connect()
     .then(() => console.log("Connected to PostgreSQL"))
     .catch(err => console.error("Database connection error", err));
 
-//homepage
+//homepage rendering
 app.get('/', async (req, res) => {
     res.render("login.ejs");
 });
@@ -80,7 +80,7 @@ app.post("/login/submit", async (req, res) => {
 
         roleData = roleResult.rows[0];
 
-        // ✅ Ensure correct variable names are passed based on role
+        //  Ensure correct variable names are passed based on role
         if (role === "patient") {
             return res.render(dashboardView, {
                 patientdata: roleData
