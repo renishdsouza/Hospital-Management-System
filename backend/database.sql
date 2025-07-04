@@ -98,19 +98,33 @@ CREATE TABLE medicalrecords (
     FOREIGN KEY (appointment_id) REFERENCES appointment(appointment_id) ON DELETE SET NULL
 );
 
+--INSERT INTO "user" (username, password, role) VALUES
+--('patient1', 'pass1', 'patient'),
+--('patient2', 'pass2', 'patient'),
+--('patient3', 'pass3', 'patient'),
+--('patient4', 'pass4', 'patient'),
+--('patient5', 'pass5', 'patient'),
+--('doctor1', 'docpass1', 'doctor'),
+--('doctor2', 'docpass2', 'doctor'),
+--('doctor3', 'docpass3', 'doctor'),
+--('doctor4', 'docpass4', 'doctor'),
+--('doctor5', 'docpass5', 'doctor'),
+--('receptionist1', 'receppass1', 'receptionist'),
+--('admin1', 'adminpass1', 'admin');
 INSERT INTO "user" (username, password, role) VALUES
-('patient1', 'pass1', 'patient'),
-('patient2', 'pass2', 'patient'),
-('patient3', 'pass3', 'patient'),
-('patient4', 'pass4', 'patient'),
-('patient5', 'pass5', 'patient'),
-('doctor1', 'docpass1', 'doctor'),
-('doctor2', 'docpass2', 'doctor'),
-('doctor3', 'docpass3', 'doctor'),
-('doctor4', 'docpass4', 'doctor'),
-('doctor5', 'docpass5', 'doctor'),
-('receptionist1', 'receppass1', 'receptionist'),
-('admin1', 'adminpass1', 'admin');
+('patient1', '$2b$10$H7T0Gl4TXl4yjadC.zJQDu/hfVjNqLtx9dvfugW0eO7F4hpjeTNta', 'patient'),
+('patient2', '$2b$10$rVcP00FxjVXWba2A0UhNtOdN740hU/mF.geB8J64LLZycPDaUpkee', 'patient'),
+('patient3', '$2b$10$CTqgB2xz3E2ewF.mi1tIaeFVQJQZfN7DpoeJuYtNBkh6RjVBVEN/i', 'patient'),
+('patient4', '$2b$10$qsE/7xZHJVaTJMXWWvmpkubpTZzh97eLt/kj/JbTv93S8qOcXW8M.', 'patient'),
+('patient5', '$2b$10$WkM/CNyg7u3O6vryhBcfI.7nPcrOPHE4.OBf.KpDv2JD1P83rJfKa', 'patient'),
+('doctor1', '$2b$10$dMlvLiRsSEc5UaX3r/Q.bu2cKaVykdYsr/h.mzIIa5IA2L3aI0nha', 'doctor'),
+('doctor2', '$2b$10$IXGeDFdsmdE7Q.E/d3Wv0eV.6pYzQ3W0nSCtcVUlRk0SDzm1Tuzty', 'doctor'),
+('doctor3', '$2b$10$TE59Pk.PL/uNlZU0TEo6gO0/Yfd3xROPSGL95dnNAi.pErHEZmDwm', 'doctor'),
+('doctor4', '$2b$10$mqjq0RnPeRweCTI1pQeXHucSVtrDH/j1C2u4sbnTT2KO6c2wfe0XO', 'doctor'),
+('doctor5', '$2b$10$7hp4sFWC9iDmdiFnc/rmP.YNeXsWYyDiX2FxjlqwVj1tAcyr/IscC', 'doctor'),
+('receptionist1', '$2b$10$RwlLa35XJs9DkGIqN.8gG.q.MBX3UvSp.wEB/jCukiFLSVM5D7WjK', 'receptionist'),
+('admin1', '$2b$10$RwlLa35XJs9DkGIqN.8gG.q.MBX3UvSp.wEB/jCukiFLSVM5D7WjK', 'admin');
+
 
 -- Insert Patients
 INSERT INTO patient (user_id, name, dob, gender, phone, email, address, blood_group, medical_history) VALUES
