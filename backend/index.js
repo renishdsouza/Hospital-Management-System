@@ -5,8 +5,11 @@ import pg from 'pg';
 import dotenv from 'dotenv';
 import path from 'path';
 import { fileURLToPath } from 'url';
+import bcrypt from 'bcrypt';
 
 dotenv.config();
+
+const saltRounds = parseInt(process.env.BCRYPT_ROUNDS);
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 const app = express();
@@ -40,12 +43,20 @@ app.post("/login/submit", async (req, res) => {
     const { username, password, role } = req.body;
 
     try {
+        if(typeof password === "string" && password.length < 70){
+
+        }
+        else{
+            return res.render("login.ejs", { status: "false" });
+        }
         const result = await pool.query(
-            'SELECT * FROM "user" WHERE username = $1 AND password = $2 AND role = $3',
-            [username, password, role]
+            'SELECT * FROM "user" WHERE username = $1  AND role = $2',
+            [username, role]
         );
 
-        if (result.rows.length === 0) {
+console.log(password,result.rows[0].password);
+        let pwdcorrect = await bcrypt.compare(password , result.rows[0].password);
+        if (result.rows.length === 0 || !pwdcorrect) {
             return res.render("login.ejs", { status: "false" });
         }
 
