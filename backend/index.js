@@ -144,9 +144,11 @@ app.post("/new/patient/register/submit", async (req, res) => {
         await client.query("BEGIN");
 
         // Insert into user table first
+        //hash password
+        const hpassword = await bcrypt.hash(password,saltRounds);
         const userInsertQuery =
             'INSERT INTO "user" (username, password, role) VALUES ($1, $2, $3) RETURNING user_id';
-        const userResult = await client.query(userInsertQuery, [username, password, "patient"]);
+        const userResult = await client.query(userInsertQuery, [username, hpassword, "patient"]);
         const userId = userResult.rows[0].user_id;
 
         // Insert into patient table
@@ -798,8 +800,10 @@ app.post("/admin/add/new/user/stage1",async (req,res)=>{
     try {
         await client.query("BEGIN");
         //user table insert first
+        //hash password
+        const hpassword = await bcrypt.hash(password,saltRounds); 
         const userInsertQuery = 'INSERT INTO "user" (username, password, role) VALUES ($1, $2, $3) RETURNING user_id';
-        const userResult = await client.query(userInsertQuery, [username, password, role]);
+        const userResult = await client.query(userInsertQuery, [username, hpassword, role]);
         const userId = userResult.rows[0].user_id;
         await client.query("COMMIT");
         if(role=="patient")
@@ -1056,8 +1060,9 @@ app.post("/admin/update/stage3/patient", async (req, res) => {
         }
 
         // Handle password separately if included
+        const hpassword= await bcrypt.hash(req.body.password,saltRounds);
         if (fieldsToUpdate.includes("password") && req.body.password) {
-            await client.query('UPDATE "user" SET password = $1 WHERE user_id = $2', [req.body.password, userid]);
+            await client.query('UPDATE "user" SET password = $1 WHERE user_id = $2', [hpassword, userid]);
         }
 
         await client.query("COMMIT");
@@ -1160,8 +1165,10 @@ app.post("/admin/update/stage3/receptionist", async (req, res) => {
         }
 
         // Handle password separately if included
-        if (fieldsToUpdate.includes("password") && req.body.password) {
-            await client.query('UPDATE "user" SET password = $1 WHERE user_id = $2', [req.body.password, userid]);
+
+        const hpassword= await bcrypt.hash(req.body.password,saltRounds);
+        if (fieldsToUpdate.includes("password") && req.body.password) { 
+            await client.query('UPDATE "user" SET password = $1 WHERE user_id = $2', [hpassword, userid]);
         }
 
         await client.query("COMMIT");
@@ -1269,8 +1276,9 @@ app.post("/admin/update/stage3/doctor", async (req, res) => {
         }
 
         // Handle password separately if included
+        const hpassword = await bcypt.hash(req.body.password,saltRounds);
         if (fieldsToUpdate.includes("password") && req.body.password) {
-            await client.query('UPDATE "user" SET password = $1 WHERE user_id = $2', [req.body.password, userid]);
+            await client.query('UPDATE "user" SET password = $1 WHERE user_id = $2', [hpassword, userid]);
         }
 
         await client.query("COMMIT");
