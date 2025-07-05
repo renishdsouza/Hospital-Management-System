@@ -54,7 +54,6 @@ app.post("/login/submit", async (req, res) => {
             [username, role]
         );
 
-console.log(password,result.rows[0].password);
         let pwdcorrect = await bcrypt.compare(password , result.rows[0].password);
         if (result.rows.length === 0 || !pwdcorrect) {
             return res.render("login.ejs", { status: "false" });
